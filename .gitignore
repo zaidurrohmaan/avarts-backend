@@ -1,0 +1,17 @@
+# Binaries
+*.exe
+*.out
+*.bin
+
+# Env
+.env
+config.json
+*.key
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
