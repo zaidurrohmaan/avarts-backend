@@ -1,19 +1,22 @@
 package routes
 
 import (
-	"avarts/controllers"
+	"avarts/auth"
 	"avarts/middlewares"
+	"avarts/user"
 
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterRoutes(r *gin.Engine, authCtrl *controllers.AuthController) {
-	r.POST("auth/google-login", authCtrl.GoogleLogin)
+func AuthRoutes(r *gin.Engine, authHandler *auth.Handler) {
+	r.POST("auth/google-login", authHandler.GoogleLogin)
+}
 
+func UserRoutes(r *gin.Engine, userHandler *user.Handler) {
 	protected := r.Group("/").Use(middlewares.AuthMiddleware())
 	{
-		protected.GET("/profile/:username", authCtrl.Profile)
-		protected.GET("/profile/me", authCtrl.MyProfile)
-		protected.PATCH("/profile/update/", authCtrl.UpdateProfile)
+		protected.GET("/profile/:username", userHandler.Profile)
+		protected.GET("/profile/me", userHandler.MyProfile)
+		protected.PATCH("/profile/update/", userHandler.UpdateProfile)
 	}
 }

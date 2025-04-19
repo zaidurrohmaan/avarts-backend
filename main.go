@@ -1,12 +1,11 @@
 package main
 
 import (
+	"avarts/activity"
+	"avarts/auth"
 	"avarts/config"
-	"avarts/controllers"
-	"avarts/models"
-	"avarts/repository"
 	"avarts/routes"
-	"avarts/services"
+	"avarts/user"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,14 +13,20 @@ import (
 func main() {
 	config.LoadEnv()
 	config.InitDB()
-	models.MigrateUser(config.DB)
 
-	repo := repository.NewUserRepository(config.DB)
-	service := services.NewAuthService(repo)
-	ctrl := controllers.NewAuthController(service)
+	user.MigrateUser(config.DB)
+	activity.MigrateActivity(config.DB)
+
+	userRepository := user.NewRepository(config.DB)
+	userService := user.NewService(userRepository)
+	userHandler := user.NewHandler(userService)
+
+	authService := auth.NewService(userRepository)
+	authHandler := auth.NewHandler(authService)
 
 	r := gin.Default()
-	routes.RegisterRoutes(r, ctrl)
+	routes.AuthRoutes(r, authHandler)
+	routes.UserRoutes(r, userHandler)
 
 	r.Run(":8080")
 }
