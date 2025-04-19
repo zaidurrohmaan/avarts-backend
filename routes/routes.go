@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"avarts/activity"
 	"avarts/auth"
 	"avarts/middlewares"
 	"avarts/user"
@@ -18,5 +19,12 @@ func UserRoutes(r *gin.Engine, userHandler *user.Handler) {
 		protected.GET("/profile/:username", userHandler.Profile)
 		protected.GET("/profile/me", userHandler.MyProfile)
 		protected.PATCH("/profile/update/", userHandler.UpdateProfile)
+	}
+}
+
+func ActivityRoutes(r *gin.Engine, activityHandler *activity.Handler) {
+	protected := r.Group("/").Use(middlewares.AuthMiddleware())
+	{
+		protected.GET("/activities/:id", activityHandler.GetActivityByID)
 	}
 }

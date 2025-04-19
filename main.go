@@ -24,9 +24,14 @@ func main() {
 	authService := auth.NewService(userRepository)
 	authHandler := auth.NewHandler(authService)
 
+	activityRepository := activity.NewRepository(config.DB)
+	activityService := activity.NewService(activityRepository)
+	activityHandler := activity.NewHandler(activityService)
+
 	r := gin.Default()
 	routes.AuthRoutes(r, authHandler)
 	routes.UserRoutes(r, userHandler)
+	routes.ActivityRoutes(r, activityHandler)
 
 	r.Run(":8080")
 }
