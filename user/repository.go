@@ -7,7 +7,7 @@ import (
 )
 
 type Repository interface {
-	Get(userId uint) (*User, error)
+	Get(userID uint) (*User, error)
 	GetByUsername(username string) (*User, error)
 	GetByGoogleId(googleId string) (*User, error)
 	Create(user *User) error
@@ -23,9 +23,9 @@ func NewRepository(db *gorm.DB) Repository {
 	return &repository{db}
 }
 
-func (r *repository) Get(userId uint) (*User, error) {
+func (r *repository) Get(userID uint) (*User, error) {
 	var user User
-	result := r.db.First(&user, userId)
+	result := r.db.First(&user, userID)
 	return &user, result.Error
 }
 

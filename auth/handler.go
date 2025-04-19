@@ -14,7 +14,7 @@ func NewHandler(service Service) *Handler {
 	return &Handler{service}
 }
 
-func (handler *Handler) GoogleLogin(c *gin.Context) {
+func (h *Handler) GoogleLogin(c *gin.Context) {
 	var body GoogleLoginRequest
 
 	if err := c.ShouldBindJSON(&body); err != nil || body.IdToken == "" {
@@ -22,7 +22,7 @@ func (handler *Handler) GoogleLogin(c *gin.Context) {
 		return
 	}
 
-	token, err := handler.service.LoginWithGoogle(body.IdToken, body.Name, body.AvatarURL)
+	token, err := h.service.LoginWithGoogle(body.IdToken, body.Name, body.AvatarURL)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return

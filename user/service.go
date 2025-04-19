@@ -6,8 +6,8 @@ import (
 
 type Service interface {
 	GetProfile(username string) (*User, error)
-	MyProfile(userId uint) (*User, error)
-	UpdateProfile(userId uint, updated *User) (*User, error)
+	MyProfile(userID uint) (*User, error)
+	UpdateProfile(userID uint, updated *User) (*User, error)
 }
 
 type service struct {
@@ -22,12 +22,12 @@ func (s *service) GetProfile(username string) (*User, error) {
 	return s.repository.GetByUsername(username)
 }
 
-func (s *service) MyProfile(userId uint) (*User, error) {
-	return s.repository.Get(userId)
+func (s *service) MyProfile(userID uint) (*User, error) {
+	return s.repository.Get(userID)
 }
 
-func (s *service) UpdateProfile(userId uint, updated *User) (*User, error) {
-	user, err := s.repository.Get(userId)
+func (s *service) UpdateProfile(userID uint, updated *User) (*User, error) {
+	user, err := s.repository.Get(userID)
 	if err != nil {
 		return nil, err
 	}
