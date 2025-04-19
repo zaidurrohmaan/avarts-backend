@@ -1,6 +1,8 @@
 package activity
 
 import (
+	"avarts/constants"
+	"avarts/response"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,7 +24,7 @@ func NewHandler(service Service) *Handler {
 func (h *Handler) UploadActivityPhoto(c *gin.Context) {
 	file, err := c.FormFile("photo")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Photo file required"})
+		response.SendError(c, http.StatusBadRequest, constants.PHOTO_FILE_REQUIRED)
 		return
 	}
 
@@ -30,18 +32,18 @@ func (h *Handler) UploadActivityPhoto(c *gin.Context) {
 	savePath := "./uploads/" + filename
 
 	if err := c.SaveUploadedFile(file, savePath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
+		response.SendError(c, http.StatusInternalServerError, constants.UPLOAD_FILE_FAILED)
 		return
 	}
 
 	fileURL := fmt.Sprintf("http://localhost:8080/uploads/%s", filename)
-	c.JSON(http.StatusOK, gin.H{"url": fileURL})
+	response.SendSuccess(c, http.StatusOK, constants.UPLOAD_FILE_SUCCESS, fileURL)
 }
 
 func (h *Handler) PostActivity(c *gin.Context) {
 	var req CreateActivityRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		response.SendError(c, http.StatusBadRequest, constants.INVALID_REQUEST)
 		return
 	}
 
@@ -68,7 +70,7 @@ func (h *Handler) PostActivity(c *gin.Context) {
 
 	// Save activity
 	if err := h.service.CreateActivity(&activity); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create activity"})
+		response.SendError(c, http.StatusInternalServerError, constants.CREATE_ACTIVITY_FAILED)
 		return
 	}
 
@@ -79,12 +81,12 @@ func (h *Handler) PostActivity(c *gin.Context) {
 			URL: url,
 		}
 		if err := h.service.CreatePicture(&pic); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save picture"})
+			response.SendError(c, http.StatusInternalServerError, constants.SAVE_PHOTO_METADATA_FAILED)
 			return
 		}
 	}
 
-	c.JSON(http.StatusCreated, activity)
+	response.SendSuccess(c, http.StatusCreated, constants.CREATE_ACTIVITY_SUCCESS, activity)
 }
 
 func (h *Handler) GetActivityByID(c *gin.Context) {
@@ -92,21 +94,21 @@ func (h *Handler) GetActivityByID(c *gin.Context) {
 
 	activityID, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid activity ID"})
+		response.SendError(c, http.StatusBadRequest, constants.INVALID_TYPE_ACTIVITY_ID)
 		return
 	}
 
 	activity, err := h.service.GetByID(uint(activityID))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "activity not found"})
+			response.SendError(c, http.StatusNotFound, constants.ACTIVITY_NOT_FOUND)
 			return
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			response.SendError(c, http.StatusInternalServerError, err.Error())
 		}
 	}
 
-	c.JSON(http.StatusOK, activity)
+	response.SendSuccess(c, http.StatusOK, constants.ACTIVITY_FOUND_SUCCESS, activity)
 }
 
 func (h *Handler) GetAllActivities(c *gin.Context) {
@@ -120,8 +122,8 @@ func (h *Handler) GetAllActivities(c *gin.Context) {
 
 	activities, err := h.service.GetAll(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get activities"})
+		response.SendError(c, http.StatusInternalServerError, constants.ACTIVITY_NOT_FOUND)
 		return
 	}
-	c.JSON(http.StatusOK, activities)
+	response.SendSuccess(c, http.StatusOK, constants.ACTIVITY_FOUND_SUCCESS, activities)
 }

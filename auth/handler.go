@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"avarts/constants"
+	"avarts/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,15 +20,15 @@ func (h *Handler) GoogleLogin(c *gin.Context) {
 	var body GoogleLoginRequest
 
 	if err := c.ShouldBindJSON(&body); err != nil || body.IdToken == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing ID token"})
+		response.SendError(c, http.StatusBadRequest, constants.MISSING_ID_TOKEN)
 		return
 	}
 
 	token, err := h.service.LoginWithGoogle(body.IdToken, body.Name, body.AvatarURL)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		response.SendError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	response.SendSuccess(c, http.StatusOK, constants.LOGIN_SUCCESS, token)
 }

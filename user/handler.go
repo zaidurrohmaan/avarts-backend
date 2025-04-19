@@ -1,6 +1,8 @@
 package user
 
 import (
+	"avarts/constants"
+	"avarts/response"
 	"errors"
 	"net/http"
 
@@ -22,59 +24,60 @@ func (h *Handler) Profile(c *gin.Context) {
 	user, err := h.service.GetProfile(username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			response.SendError(c, http.StatusNotFound, constants.USER_NOT_FOUND)
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			response.SendError(c, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}
-	c.JSON(http.StatusOK, user)
+
+	response.SendSuccess(c, http.StatusOK, constants.USER_FOUND_SUCCESS, user)
 }
 
 func (h *Handler) MyProfile(c *gin.Context) {
 	idInterface, exists := c.Get("id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		response.SendError(c, http.StatusUnauthorized, constants.UNAUTHORIZED)
 		return
 	}
 	userId, ok := idInterface.(uint)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID type"})
+		response.SendError(c, http.StatusInternalServerError, constants.INVALID_TYPE_USER_ID)
 		return
 	}
 
 	user, err := h.service.MyProfile(userId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		response.SendError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	response.SendSuccess(c, http.StatusOK, constants.USER_FOUND_SUCCESS, user)
 }
 
 func (h *Handler) UpdateProfile(c *gin.Context) {
 	idInterface, exists := c.Get("id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		response.SendError(c, http.StatusUnauthorized, constants.UNAUTHORIZED)
 		return
 	}
 	userID, ok := idInterface.(uint)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID type"})
+		response.SendError(c, http.StatusInternalServerError, constants.INVALID_TYPE_USER_ID)
 		return
 	}
 
 	var input User
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response.SendError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user, err := h.service.UpdateProfile(userID, &input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		response.SendError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	response.SendSuccess(c, http.StatusOK, constants.USER_UPDATE_SUCCESS, user)
 }
