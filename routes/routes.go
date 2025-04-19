@@ -25,6 +25,8 @@ func UserRoutes(r *gin.Engine, userHandler *user.Handler) {
 func ActivityRoutes(r *gin.Engine, activityHandler *activity.Handler) {
 	protected := r.Group("/").Use(middlewares.AuthMiddleware())
 	{
+		protected.POST("/photos", activityHandler.UploadActivityPhoto)
+		protected.POST("/activities", activityHandler.PostActivity)
 		protected.GET("/activities/:id", activityHandler.GetActivityByID)
 		protected.GET("/activities", activityHandler.GetAllActivities)
 	}
