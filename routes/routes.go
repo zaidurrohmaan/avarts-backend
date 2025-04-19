@@ -26,5 +26,6 @@ func ActivityRoutes(r *gin.Engine, activityHandler *activity.Handler) {
 	protected := r.Group("/").Use(middlewares.AuthMiddleware())
 	{
 		protected.GET("/activities/:id", activityHandler.GetActivityByID)
+		protected.GET("/activities", activityHandler.GetAllActivities)
 	}
 }

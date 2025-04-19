@@ -108,3 +108,20 @@ func (h *Handler) GetActivityByID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, activity)
 }
+
+func (h *Handler) GetAllActivities(c *gin.Context) {
+	var userID *uint
+	if idStr := c.Query("userId"); idStr != "" {
+		if id, err := strconv.ParseUint(idStr, 10, 64); err == nil {
+			uid := uint(id)
+			userID = &uid
+		}
+	}
+
+	activities, err := h.service.GetAll(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get activities"})
+		return
+	}
+	c.JSON(http.StatusOK, activities)
+}
