@@ -30,7 +30,6 @@ func VerifyGoogleToken(idToken string) (*GoogleTokenInfo, error) {
 		return nil, err
 	}
 
-	// OPTIONAL: Validasi audience
 	expectedAud := os.Getenv("GOOGLE_CLIENT_ID")
 	if tokenInfo.Audience != expectedAud {
 		return nil, errors.New("audience mismatch")

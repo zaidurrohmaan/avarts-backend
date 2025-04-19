@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	config.LoadEnv()
 	config.InitDB()
 	models.MigrateUser(config.DB)
 
