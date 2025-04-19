@@ -57,6 +57,27 @@ func (ctrl *AuthController) Profile(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+func (ctrl *AuthController) MyProfile(c *gin.Context) {
+	idInterface, exists := c.Get("id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	userId, ok := idInterface.(uint)
+	if !ok {
+    	c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID type"})
+    	return
+	}
+
+	user, err := ctrl.service.MyProfile(userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
 func (ctrl *AuthController) UpdateProfile(c *gin.Context) {
 	idInterface, exists := c.Get("id")
 	if !exists {

@@ -13,6 +13,7 @@ func RegisterRoutes(r *gin.Engine, authCtrl *controllers.AuthController) {
 	protected := r.Group("/").Use(middlewares.AuthMiddleware())
 	{
 		protected.GET("/profile/:username", authCtrl.Profile)
+		protected.GET("/profile/me", authCtrl.MyProfile)
 		protected.PATCH("/profile/update/", authCtrl.UpdateProfile)
 	}
 }

@@ -11,6 +11,7 @@ import (
 type AuthService interface {
 	LoginWithGoogle(idToken, name, avatarUrl string) (string, error)
 	GetProfile(username string) (*models.User, error)
+	MyProfile(userId uint) (*models.User, error)
 	UpdateProfile(userId uint, updated *models.User) (*models.User, error)
 }
 
@@ -63,6 +64,10 @@ func (s *authService) LoginWithGoogle(idToken, name, avatarUrl string) (string, 
 
 func (s *authService) GetProfile(username string) (*models.User, error) {
 	return s.repo.GetByUsername(username)
+}
+
+func (s *authService) MyProfile(userId uint) (*models.User, error) {
+	return s.repo.Get(userId)
 }
 
 func (s *authService) UpdateProfile(userId uint, updated *models.User) (*models.User, error) {
