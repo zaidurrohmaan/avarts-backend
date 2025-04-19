@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +18,7 @@ func NewHandler(service Service) *Handler {
 
 func (handler *Handler) Profile(c *gin.Context) {
 	username := c.Param("username")
-	fmt.Println("Username from URL param:", username)
+
 	user, err := handler.service.GetProfile(username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

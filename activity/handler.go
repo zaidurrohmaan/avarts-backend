@@ -1,11 +1,14 @@
 package activity
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type Handler struct {
@@ -16,7 +19,7 @@ func NewHandler(service Service) *Handler {
 	return &Handler{service}
 }
 
-func (h *Handler) UploadPhoto(c *gin.Context) {
+func (h *Handler) UploadActivityPhoto(c *gin.Context) {
 	file, err := c.FormFile("photo")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Photo file required"})
@@ -35,7 +38,7 @@ func (h *Handler) UploadPhoto(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"url": fileURL})
 }
 
-func (handler *Handler) PostActivity(c *gin.Context) {
+func (h *Handler) PostActivity(c *gin.Context) {
 	var req CreateActivityRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
@@ -64,7 +67,7 @@ func (handler *Handler) PostActivity(c *gin.Context) {
 	}
 
 	// Save activity
-	if err := handler.service.CreateActivity(&activity); err != nil {
+	if err := h.service.CreateActivity(&activity); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create activity"})
 		return
 	}
@@ -75,11 +78,33 @@ func (handler *Handler) PostActivity(c *gin.Context) {
 			ActivityID: activity.ID,
 			URL: url,
 		}
-		if err := handler.service.CreatePicture(&pic); err != nil {
+		if err := h.service.CreatePicture(&pic); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save picture"})
 			return
 		}
 	}
 
 	c.JSON(http.StatusCreated, activity)
+}
+
+func (h *Handler) GetActivityByID(c *gin.Context) {
+	idParam := c.Param("id")
+
+	activityID, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid activity ID"})
+		return
+	}
+
+	activity, err := h.service.GetByID(uint(activityID))
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "activity not found"})
+			return
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+	}
+
+	c.JSON(http.StatusOK, activity)
 }

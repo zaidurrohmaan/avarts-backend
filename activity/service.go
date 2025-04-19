@@ -3,6 +3,7 @@ package activity
 type Service interface {
 	CreateActivity(activity *Activity) error
 	CreatePicture(picture *Picture) error
+	GetByID(activityID uint) (*Activity, error)
 }
 
 type service struct {
@@ -21,3 +22,6 @@ func (s *service) CreatePicture(picture *Picture) error {
 	return s.repository.CreatePicture(picture)
 }
 
+func (s *service) GetByID(activityID uint) (*Activity, error) {
+	return s.repository.GetByID(activityID)
+}
