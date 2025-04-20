@@ -29,9 +29,11 @@ func main() {
 	activityHandler := activity.NewHandler(activityService)
 
 	r := gin.Default()
-	routes.AuthRoutes(r, authHandler)
-	routes.UserRoutes(r, userHandler)
-	routes.ActivityRoutes(r, activityHandler)
+	
+	api := r.Group("/api")
+	routes.AuthRoutes(api, authHandler)
+	routes.UserRoutes(api, userHandler)
+	routes.ActivityRoutes(api, activityHandler)
 
 	r.Run(":8080")
 }

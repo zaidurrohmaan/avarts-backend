@@ -9,11 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthRoutes(r *gin.Engine, authHandler *auth.Handler) {
+func AuthRoutes(r *gin.RouterGroup, authHandler *auth.Handler) {
 	r.POST("auth/google-login", authHandler.GoogleLogin)
 }
 
-func UserRoutes(r *gin.Engine, userHandler *user.Handler) {
+func UserRoutes(r *gin.RouterGroup, userHandler *user.Handler) {
 	protected := r.Group("/").Use(middlewares.AuthMiddleware())
 	{
 		protected.GET("/profile/:username", userHandler.Profile)
@@ -22,7 +22,7 @@ func UserRoutes(r *gin.Engine, userHandler *user.Handler) {
 	}
 }
 
-func ActivityRoutes(r *gin.Engine, activityHandler *activity.Handler) {
+func ActivityRoutes(r *gin.RouterGroup, activityHandler *activity.Handler) {
 	protected := r.Group("/").Use(middlewares.AuthMiddleware())
 	{
 		protected.POST("/photos", activityHandler.UploadActivityPhoto)
