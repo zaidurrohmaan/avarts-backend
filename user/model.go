@@ -17,6 +17,25 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type UserResponse struct {
+	ID        uint      `json:"id"`
+	Username  string    `json:"username"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	AvatarUrl string    `json:"avatar_url"`
+}
+
+func GenerateUserResponse(userData *User) (UserResponse) {
+	userResponse := UserResponse {
+		ID: userData.ID,
+		Username: userData.Username,
+		Name: userData.Name,
+		Email: userData.Email,
+		AvatarUrl: userData.AvatarUrl,
+	}
+	return userResponse
+}
+
 func MigrateUser(db *gorm.DB) {
 	db.AutoMigrate(&User{})
 }

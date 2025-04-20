@@ -3,8 +3,11 @@ package activity
 type Service interface {
 	CreateActivity(activity *Activity) error
 	CreatePicture(picture *Picture) error
-	GetByID(activityID uint) (*Activity, error)
+	GetByID(activityID *uint) (*Activity, error)
 	GetAll(userID *uint) (*[]Activity, error)
+	GetPictureUrlsByActivityID(activityID *uint) (*[]string, error)
+	DeletePictureByID(id uint) error
+	DeleteActivityByID(activityID uint) error
 }
 
 type service struct {
@@ -23,10 +26,22 @@ func (s *service) CreatePicture(picture *Picture) error {
 	return s.repository.CreatePicture(picture)
 }
 
-func (s *service) GetByID(activityID uint) (*Activity, error) {
+func (s *service) GetByID(activityID *uint) (*Activity, error) {
 	return s.repository.GetByID(activityID)
 }
 
 func (s *service) GetAll(userID *uint) (*[]Activity, error) {
 	return s.repository.GetAll(userID)
+}
+
+func (s *service) GetPictureUrlsByActivityID(activityID *uint) (*[]string, error) {
+	return s.repository.GetPictureUrlsByActivityID(activityID)
+}
+
+func (s *service) DeletePictureByID(id uint) error {
+	return s.repository.DeletePictureByID(id)
+}
+
+func (s *service) DeleteActivityByID(activityID uint) error {
+	return s.repository.DeleteActivityByID(activityID)
 }

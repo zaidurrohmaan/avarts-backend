@@ -28,3 +28,7 @@ func SendSuccess(c *gin.Context, code int, message string, data interface{}) {
 func SendError(c *gin.Context, code int, message string) {
 	SendResponse(c, code, constants.STATUS_FAILED, message, nil)
 }
+
+func SendSuccessWithWarning(c *gin.Context, message string) {
+	SendSuccess(c, http.StatusCreated, message, nil)
+}

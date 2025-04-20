@@ -74,41 +74,67 @@ func (h *Handler) PostActivity(c *gin.Context) {
 		return
 	}
 
-	// Save pictures
+	// Map PictureUrls to ActivityID
 	for _, url := range req.PictureURLs {
 		pic := Picture {
 			ActivityID: activity.ID,
 			URL: url,
 		}
 		if err := h.service.CreatePicture(&pic); err != nil {
-			response.SendError(c, http.StatusInternalServerError, constants.SAVE_PHOTO_METADATA_FAILED)
+			// Rollback: delete the activity, and all associated pictures will be automatically deleted as well
+			_ = h.service.DeleteActivityByID(activity.ID)
+			response.SendError(c, http.StatusInternalServerError, constants.CREATE_ACTIVITY_FAILED)
 			return
 		}
 	}
 
-	response.SendSuccess(c, http.StatusCreated, constants.CREATE_ACTIVITY_SUCCESS, activity)
+	newActivity, err := h.service.GetByID(&activity.ID)
+	if err != nil {
+		response.SendSuccessWithWarning(c, constants.CREATE_ACTIVITY_SUCCESS_WITH_WARNING)
+		return
+	}
+	newActivityResponse := GenerateActivityResponse(newActivity)
+
+	pictureUrls, err := h.service.GetPictureUrlsByActivityID(&activity.ID)
+	if err != nil {
+		response.SendSuccessWithWarning(c, constants.CREATE_ACTIVITY_SUCCESS_WITH_WARNING)
+		return
+	}
+	newActivityResponse.PictureURLs = *pictureUrls
+
+	response.SendSuccess(c, http.StatusCreated, constants.CREATE_ACTIVITY_SUCCESS, newActivityResponse)
 }
 
 func (h *Handler) GetActivityByID(c *gin.Context) {
 	idParam := c.Param("id")
 
-	activityID, err := strconv.ParseUint(idParam, 10, 64)
+	id, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
 		response.SendError(c, http.StatusBadRequest, constants.INVALID_TYPE_ACTIVITY_ID)
 		return
 	}
 
-	activity, err := h.service.GetByID(uint(activityID))
+	activityID := uint(id)
+
+	activity, err := h.service.GetByID(&activityID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			response.SendError(c, http.StatusNotFound, constants.ACTIVITY_NOT_FOUND)
 			return
 		} else {
 			response.SendError(c, http.StatusInternalServerError, err.Error())
+			return
 		}
 	}
+	activityResponse := GenerateActivityResponse(activity)
+	pictureUrls, err := h.service.GetPictureUrlsByActivityID(&activityID)
+	if err != nil {
+		response.SendError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	activityResponse.PictureURLs = *pictureUrls
 
-	response.SendSuccess(c, http.StatusOK, constants.ACTIVITY_FOUND_SUCCESS, activity)
+	response.SendSuccess(c, http.StatusOK, constants.ACTIVITY_FOUND_SUCCESS, activityResponse)
 }
 
 func (h *Handler) GetAllActivities(c *gin.Context) {
@@ -125,5 +151,19 @@ func (h *Handler) GetAllActivities(c *gin.Context) {
 		response.SendError(c, http.StatusInternalServerError, constants.ACTIVITY_NOT_FOUND)
 		return
 	}
-	response.SendSuccess(c, http.StatusOK, constants.ACTIVITY_FOUND_SUCCESS, activities)
+
+	var activitiesResponse []ActivityResponse
+	for _, activity := range *activities {
+		activityResponse := GenerateActivityResponse(&activity)
+		activityID := activityResponse.ID
+		pictureUrls, err := h.service.GetPictureUrlsByActivityID(&activityID)
+		if err != nil {
+			response.SendError(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+		activityResponse.PictureURLs = *pictureUrls
+		activitiesResponse = append(activitiesResponse, activityResponse)
+	}
+
+	response.SendSuccess(c, http.StatusOK, constants.ACTIVITY_FOUND_SUCCESS, activitiesResponse)
 }

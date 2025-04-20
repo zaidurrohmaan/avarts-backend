@@ -11,6 +11,7 @@ const (
 
 	// ACTIVITY & PHOTO
 	CREATE_ACTIVITY_SUCCESS = "Success to create activity"
+	CREATE_ACTIVITY_SUCCESS_WITH_WARNING = "Success to create activity. Failed to retrieve activity data."
 	CREATE_ACTIVITY_FAILED = "Failed to create activity"
 	ACTIVITY_NOT_FOUND = "Activity not found"
 	ACTIVITY_FOUND_SUCCESS = "Successfully fetch activity data"

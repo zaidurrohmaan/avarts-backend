@@ -27,7 +27,7 @@ type Activity struct {
 
 type Picture struct {
 	ID         uint   `gorm:"primaryKey;autoIncrement" json:"id"`
-	ActivityID uint   `gorm:"not null" json:"activity_id"`
+	ActivityID uint   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"activity_id"`
 	URL        string `gorm:"type:varchar(255)" json:"url"`
 }
 
@@ -45,6 +45,53 @@ type CreateActivityRequest struct {
 	PictureURLs  []string `json:"picture_urls"`
 }
 
+type ActivityUserResponse struct {
+	ID        uint   `json:"id"`
+	Username  string `json:"username"`
+	Name      string `json:"name"`
+	AvatarURL string `json:"avatar_url"`
+}
+
+type ActivityResponse struct {
+	ID           uint                 `json:"id"`
+	User         ActivityUserResponse `json:"user"`
+	Title        string               `json:"title"`
+	Caption      string               `json:"caption"`
+	Distance     float64              `json:"distance"`
+	Pace         float64              `json:"pace"`
+	StepsCount   int                  `json:"steps_count"`
+	StartTime    time.Time            `json:"start_time"`
+	EndTime      time.Time            `json:"end_time"`
+	Location     string               `json:"location"`
+	ActivityType string               `json:"activity_type"`
+	Date         time.Time            `json:"date"`
+	PictureURLs    []string             `json:"picture_urls"`
+}
+
 func MigrateActivity(db *gorm.DB) {
 	db.AutoMigrate(&Activity{}, &Picture{})
+}
+
+func GenerateActivityResponse(activityData *Activity) ActivityResponse {
+	
+	response := ActivityResponse{
+		ID: activityData.ID,
+		User: ActivityUserResponse{
+			ID:        activityData.User.ID,
+			Username:  activityData.User.Username,
+			Name:      activityData.User.Name,
+			AvatarURL: activityData.User.AvatarUrl,
+		},
+		Title:        activityData.Title,
+		Caption:      activityData.Caption,
+		Distance:     activityData.Distance,
+		Pace:         activityData.Pace,
+		StepsCount:   activityData.StepsCount,
+		StartTime:    activityData.StartTime,
+		EndTime:      activityData.EndTime,
+		Location:     activityData.Location,
+		ActivityType: activityData.ActivityType,
+		Date:         activityData.Date,
+	}
+	return response
 }

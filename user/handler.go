@@ -31,7 +31,9 @@ func (h *Handler) Profile(c *gin.Context) {
 		return
 	}
 
-	response.SendSuccess(c, http.StatusOK, constants.USER_FOUND_SUCCESS, user)
+	userResponse := GenerateUserResponse(user)
+
+	response.SendSuccess(c, http.StatusOK, constants.USER_FOUND_SUCCESS, userResponse)
 }
 
 func (h *Handler) MyProfile(c *gin.Context) {
@@ -51,8 +53,9 @@ func (h *Handler) MyProfile(c *gin.Context) {
 		response.SendError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+	userResponse := GenerateUserResponse(user)
 
-	response.SendSuccess(c, http.StatusOK, constants.USER_FOUND_SUCCESS, user)
+	response.SendSuccess(c, http.StatusOK, constants.USER_FOUND_SUCCESS, userResponse)
 }
 
 func (h *Handler) UpdateProfile(c *gin.Context) {
@@ -78,6 +81,7 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 		response.SendError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+	userResponse := GenerateUserResponse(user)
 
-	response.SendSuccess(c, http.StatusOK, constants.USER_UPDATE_SUCCESS, user)
+	response.SendSuccess(c, http.StatusOK, constants.USER_UPDATE_SUCCESS, userResponse)
 }
