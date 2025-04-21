@@ -3,6 +3,7 @@ package activity
 import (
 	"avarts/constants"
 	"avarts/response"
+	"avarts/utils"
 	"errors"
 	"fmt"
 	"net/http"
@@ -47,8 +48,10 @@ func (h *Handler) PostActivity(c *gin.Context) {
 		return
 	}
 
-	userIDInterface, _ := c.Get("id")
-	userID := userIDInterface.(uint)
+	userID, isError := utils.GetUserIDFromJWT(c)
+	if isError {
+		return
+	}
 
 	startTime, _ := time.Parse(time.RFC3339, req.StartTime)
 	endTime, _ := time.Parse(time.RFC3339, req.EndTime)
@@ -139,7 +142,7 @@ func (h *Handler) GetActivityByID(c *gin.Context) {
 
 func (h *Handler) GetAllActivities(c *gin.Context) {
 	var userID *uint
-	if idStr := c.Query("userId"); idStr != "" {
+	if idStr := c.Query("userID"); idStr != "" {
 		if id, err := strconv.ParseUint(idStr, 10, 64); err == nil {
 			uid := uint(id)
 			userID = &uid
@@ -169,15 +172,8 @@ func (h *Handler) GetAllActivities(c *gin.Context) {
 }
 
 func (h *Handler) CreateLike(c *gin.Context) {
-
-	idInterface, exists := c.Get("id")
-	if !exists {
-		response.SendError(c, http.StatusUnauthorized, constants.UNAUTHORIZED)
-		return
-	}
-	userId, ok := idInterface.(uint)
-	if !ok {
-		response.SendError(c, http.StatusInternalServerError, constants.INVALID_TYPE_USER_ID)
+	userID, isError := utils.GetUserIDFromJWT(c)
+	if isError {
 		return
 	}
 
@@ -190,7 +186,7 @@ func (h *Handler) CreateLike(c *gin.Context) {
 
 	like := &Like{
 		ActivityID: req.ActivityID,
-		UserID:     userId,
+		UserID:     userID,
 	}
 
 	isLikeExists, err := h.service.IsLikeExists(like)
@@ -214,14 +210,8 @@ func (h *Handler) CreateLike(c *gin.Context) {
 }
 
 func (h *Handler) DeleteLike(c *gin.Context) {
-	idInterface, exists := c.Get("id")
-	if !exists {
-		response.SendError(c, http.StatusUnauthorized, constants.UNAUTHORIZED)
-		return
-	}
-	userId, ok := idInterface.(uint)
-	if !ok {
-		response.SendError(c, http.StatusInternalServerError, constants.INVALID_TYPE_USER_ID)
+	userID, isError := utils.GetUserIDFromJWT(c)
+	if isError {
 		return
 	}
 
@@ -233,7 +223,7 @@ func (h *Handler) DeleteLike(c *gin.Context) {
 
 	like := &Like{
 		ActivityID: req.ActivityID,
-		UserID: userId,
+		UserID: userID,
 	}
 
 	isLikeExists, err := h.service.IsLikeExists(like)
@@ -263,21 +253,15 @@ func (h *Handler) CreateComment(c *gin.Context) {
 		return
 	}
 
-	idInterface, exists := c.Get("id")
-	if !exists {
-		response.SendError(c, http.StatusUnauthorized, constants.UNAUTHORIZED)
-		return
-	}
-	userId, ok := idInterface.(uint)
-	if !ok {
-		response.SendError(c, http.StatusInternalServerError, constants.INVALID_TYPE_USER_ID)
+	userID, isError := utils.GetUserIDFromJWT(c)
+	if isError {
 		return
 	}
 
 	comment := &Comment {
 		ActivityID: req.ActivityID,
 		Text: req.Text,
-		UserID: userId,
+		UserID: userID,
 	}
 
 	responseData, err := h.service.CreateComment(comment)
@@ -290,14 +274,8 @@ func (h *Handler) CreateComment(c *gin.Context) {
 }
 
 func (h *Handler) DeleteComment(c *gin.Context) {
-	idInterface, exists := c.Get("id")
-	if !exists {
-		response.SendError(c, http.StatusUnauthorized, constants.UNAUTHORIZED)
-		return
-	}
-	userId, ok := idInterface.(uint)
-	if !ok {
-		response.SendError(c, http.StatusInternalServerError, constants.INVALID_TYPE_USER_ID)
+	userID, isError := utils.GetUserIDFromJWT(c)
+	if isError {
 		return
 	}
 
@@ -307,7 +285,7 @@ func (h *Handler) DeleteComment(c *gin.Context) {
 		return
 	}
 
-	statusCode, err := h.service.DeleteComment(userId, req.CommentID)
+	statusCode, err := h.service.DeleteComment(userID, req.CommentID)
 	if err != nil {
 		response.SendError(c, statusCode, err.Error())
 		return

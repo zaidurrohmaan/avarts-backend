@@ -3,6 +3,7 @@ package user
 import (
 	"avarts/constants"
 	"avarts/response"
+	"avarts/utils"
 	"errors"
 	"net/http"
 
@@ -37,18 +38,12 @@ func (h *Handler) Profile(c *gin.Context) {
 }
 
 func (h *Handler) MyProfile(c *gin.Context) {
-	idInterface, exists := c.Get("id")
-	if !exists {
-		response.SendError(c, http.StatusUnauthorized, constants.UNAUTHORIZED)
-		return
-	}
-	userId, ok := idInterface.(uint)
-	if !ok {
-		response.SendError(c, http.StatusInternalServerError, constants.INVALID_TYPE_USER_ID)
+	userID, isError := utils.GetUserIDFromJWT(c)
+	if isError {
 		return
 	}
 
-	user, err := h.service.MyProfile(userId)
+	user, err := h.service.MyProfile(userID)
 	if err != nil {
 		response.SendError(c, http.StatusInternalServerError, err.Error())
 		return
@@ -59,14 +54,8 @@ func (h *Handler) MyProfile(c *gin.Context) {
 }
 
 func (h *Handler) UpdateProfile(c *gin.Context) {
-	idInterface, exists := c.Get("id")
-	if !exists {
-		response.SendError(c, http.StatusUnauthorized, constants.UNAUTHORIZED)
-		return
-	}
-	userID, ok := idInterface.(uint)
-	if !ok {
-		response.SendError(c, http.StatusInternalServerError, constants.INVALID_TYPE_USER_ID)
+	userID, isError := utils.GetUserIDFromJWT(c)
+	if isError {
 		return
 	}
 
