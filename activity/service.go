@@ -21,7 +21,7 @@ type Service interface {
 
 	// Like
 	IsLikeExists(like *Like) (bool, error)
-	CreateLike(like *Like) error
+	CreateLike(userID uint, like *LikeRequest) (int, error)
 	DeleteLike(userID uint, like *LikeRequest) error
 
 	// Comment
@@ -106,8 +106,27 @@ func (s *service) IsLikeExists(like *Like) (bool, error) {
 	return s.repository.IsLikeExists(like)
 }
 
-func (s *service) CreateLike(like *Like) error {
-	return s.repository.CreateLike(like)
+func (s *service) CreateLike(userID uint, request *LikeRequest) (int, error) {
+	like := &Like{
+		ActivityID: request.ActivityID,
+		UserID:     userID,
+	}
+
+	isLikeExists, err := s.repository.IsLikeExists(like)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	if isLikeExists {
+		return http.StatusBadRequest, errors.New(constants.LikeAlreadyExists)
+	}
+
+	err = s.repository.CreateLike(like)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusCreated, nil
 }
 
 func (s *service) DeleteLike(userID uint, request *LikeRequest) error {

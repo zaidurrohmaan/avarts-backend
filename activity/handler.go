@@ -141,29 +141,12 @@ func (h *Handler) CreateLike(c *gin.Context) {
 		return
 	}
 
-	like := &Like{
-		ActivityID: req.ActivityID,
-		UserID:     userID,
-	}
-
-	isLikeExists, err := h.service.IsLikeExists(like)
+	statusCode, err := h.service.CreateLike(userID, &req)
 	if err != nil {
-		response.SendError(c, http.StatusInternalServerError, err.Error())
-		return
+		response.SendError(c, statusCode, err.Error())
 	}
 
-	if isLikeExists {
-		response.SendError(c, http.StatusBadRequest, constants.LikeAlreadyExists)
-		return
-	}
-
-	err = h.service.CreateLike(like)
-	if err != nil {
-		response.SendError(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	response.SendSuccess(c, http.StatusCreated, constants.LikeCreateSuccess, nil)
+	response.SendSuccess(c, statusCode, constants.LikeCreateSuccess, nil)
 }
 
 func (h *Handler) DeleteLike(c *gin.Context) {
