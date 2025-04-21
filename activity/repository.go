@@ -5,13 +5,20 @@ import (
 )
 
 type Repository interface {
+	// Activity
 	Create(activity *Activity) error
-	CreatePicture(picture *Picture) error
 	GetByID(activityID *uint) (*Activity, error)
 	GetAll(userID *uint) (*[]Activity, error)
+	DeleteActivityByID(activityID uint) error
+
+	// Picture
+	CreatePicture(picture *Picture) error
 	GetPictureUrlsByActivityID(activityID *uint) (*[]string, error)
 	DeletePictureByID(id uint) error
-	DeleteActivityByID(activityID uint) error
+
+	// Like
+	CreateLike(like *Like) error
+	IsLikeExist(activityID, userID uint) (bool, error)
 }
 
 type repository struct {
@@ -27,7 +34,7 @@ func (r *repository) Create(activity *Activity) error {
 }
 
 func (r *repository) CreatePicture(pics *Picture) error {
-	return r.db.Create(&pics).Error
+	return r.db.Create(pics).Error
 }
 
 func (r *repository) GetByID(activityID *uint) (*Activity, error) {
@@ -68,4 +75,17 @@ func (r *repository) DeletePictureByID(id uint) error {
 
 func (r *repository) DeleteActivityByID(activityID uint) error {
 	return r.db.Delete(&Activity{}, activityID).Error
+}
+
+func (r *repository) CreateLike(like *Like) error {
+	return r.db.Create(like).Error
+}
+
+func (r *repository) IsLikeExist(activityID, userID uint) (bool, error) {
+	var count int64
+	err := r.db.Model(&Like{}).Where("activity_id = ? AND user_id = ?", activityID, userID).Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }

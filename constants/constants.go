@@ -25,6 +25,9 @@ const (
 	UNAUTHORIZED = "Unauthorized"
 	MISSING_ID_TOKEN = "Missing ID token"
 
+	// LIKE
+	CREATE_LIKE_SUCCESS = "Successfully create like"
+
 	INVALID_TYPE_USER_ID = "Invalid type: userID"
 	INVALID_TYPE_ACTIVITY_ID = "Invalid type: activityID"
 	INVALID_REQUEST = "Invalid request"

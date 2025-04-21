@@ -5,6 +5,7 @@ import (
 	"avarts/response"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -76,9 +77,9 @@ func (h *Handler) PostActivity(c *gin.Context) {
 
 	// Map PictureUrls to ActivityID
 	for _, url := range req.PictureURLs {
-		pic := Picture {
+		pic := Picture{
 			ActivityID: activity.ID,
-			URL: url,
+			URL:        url,
 		}
 		if err := h.service.CreatePicture(&pic); err != nil {
 			// Rollback: delete the activity, and all associated pictures will be automatically deleted as well
@@ -166,4 +167,38 @@ func (h *Handler) GetAllActivities(c *gin.Context) {
 	}
 
 	response.SendSuccess(c, http.StatusOK, constants.ACTIVITY_FOUND_SUCCESS, activitiesResponse)
+}
+
+func (h *Handler) CreateLike(c *gin.Context) {
+	log.Println("wkwkwk handler called")
+	idInterface, exists := c.Get("id")
+	if !exists {
+		response.SendError(c, http.StatusUnauthorized, constants.UNAUTHORIZED)
+		return
+	}
+	userId, ok := idInterface.(uint)
+	if !ok {
+		response.SendError(c, http.StatusInternalServerError, constants.INVALID_TYPE_USER_ID)
+		return
+	}
+
+	var likeRequest LikeRequest
+	err := c.ShouldBindJSON(&likeRequest)
+	if err != nil {
+		response.SendError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	like := &Like{
+		ActivityID: likeRequest.ActivityID,
+		UserID:     userId,
+	}
+
+	err = h.service.CreateLike(like)
+	if err != nil {
+		response.SendError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.SendSuccess(c, http.StatusCreated, constants.CREATE_LIKE_SUCCESS, nil)
 }

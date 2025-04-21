@@ -1,13 +1,21 @@
 package activity
 
+import "errors"
+
 type Service interface {
+	// Activity
 	CreateActivity(activity *Activity) error
-	CreatePicture(picture *Picture) error
 	GetByID(activityID *uint) (*Activity, error)
 	GetAll(userID *uint) (*[]Activity, error)
+	DeleteActivityByID(activityID uint) error
+
+	// Picture
+	CreatePicture(picture *Picture) error
 	GetPictureUrlsByActivityID(activityID *uint) (*[]string, error)
 	DeletePictureByID(id uint) error
-	DeleteActivityByID(activityID uint) error
+
+	// Like
+	CreateLike(like *Like) error
 }
 
 type service struct {
@@ -44,4 +52,16 @@ func (s *service) DeletePictureByID(id uint) error {
 
 func (s *service) DeleteActivityByID(activityID uint) error {
 	return s.repository.DeleteActivityByID(activityID)
+}
+
+func (s *service) CreateLike(like *Like) error {
+	exist, err := s.repository.IsLikeExist(like.ActivityID, like.UserID)
+	if err != nil {
+		return err
+	}
+	if exist {
+		return errors.New("like already exists")
+	}
+
+	return s.repository.CreateLike(like)
 }

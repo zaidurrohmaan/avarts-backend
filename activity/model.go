@@ -31,6 +31,17 @@ type Picture struct {
 	URL        string `gorm:"type:varchar(255)" json:"url"`
 }
 
+type Like struct {
+	ID uint `gorm:"primaryKey;autoIncrement" json:"id"`
+	ActivityID uint `gorm:"not null" json:"activity_id"`
+	UserID uint `gorm:"not null" json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type LikeRequest struct {
+	ActivityID uint `json:"activity_id" binding:"required"`
+}
+
 type CreateActivityRequest struct {
 	Title        string   `json:"title"`
 	Caption      string   `json:"caption"`
@@ -69,7 +80,7 @@ type ActivityResponse struct {
 }
 
 func MigrateActivity(db *gorm.DB) {
-	db.AutoMigrate(&Activity{}, &Picture{})
+	db.AutoMigrate(&Activity{}, &Picture{}, &Like{})
 }
 
 func GenerateActivityResponse(activityData *Activity) ActivityResponse {
