@@ -17,18 +17,18 @@ func NewHandler(service Service) *Handler {
 }
 
 func (h *Handler) GoogleLogin(c *gin.Context) {
-	var body GoogleLoginRequest
+	var req GoogleLoginRequest
 
-	if err := c.ShouldBindJSON(&body); err != nil || body.IdToken == "" {
+	if err := c.ShouldBindJSON(&req); err != nil || req.IdToken == "" {
 		response.SendError(c, http.StatusBadRequest, constants.MissingIDToken)
 		return
 	}
 
-	token, err := h.service.LoginWithGoogle(body.IdToken, body.Name, body.AvatarURL)
+	LoginResponse, err := h.service.LoginWithGoogle(req.IdToken)
 	if err != nil {
 		response.SendError(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	response.SendSuccess(c, http.StatusOK, constants.LoginSuccess, token)
+	response.SendSuccess(c, http.StatusOK, constants.LoginSuccess, LoginResponse)
 }

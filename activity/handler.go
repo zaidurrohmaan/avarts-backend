@@ -114,6 +114,7 @@ func (h *Handler) CreateLike(c *gin.Context) {
 	statusCode, err := h.service.CreateLike(userID, &req)
 	if err != nil {
 		response.SendError(c, statusCode, err.Error())
+		return
 	}
 
 	response.SendSuccess(c, statusCode, constants.LikeCreateSuccess, nil)

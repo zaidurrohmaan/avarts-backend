@@ -2,14 +2,17 @@ package auth
 
 import (
 	"avarts/utils"
+	"errors"
 	"fmt"
 	"strings"
 
 	userPackage "avarts/user"
+
+	"gorm.io/gorm"
 )
 
 type Service interface {
-	LoginWithGoogle(idToken, name, avatarUrl string) (string, error)
+	LoginWithGoogle(idToken string) (*LoginResponse, error)
 }
 
 type service struct {
@@ -20,41 +23,68 @@ func NewService(repository userPackage.Repository) Service {
 	return &service{repository}
 }
 
-func (s *service) LoginWithGoogle(idToken, name, avatarUrl string) (string, error) {
-	tokenInfo, err := utils.VerifyGoogleToken(idToken)
+func (s *service) LoginWithGoogle(idToken string) (*LoginResponse, error) {
+	googleUserInfo, err := utils.VerifyGoogleToken(idToken)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	user, err := s.repository.GetByGoogleId(tokenInfo.UserID)
-	if err != nil {
-		emailPrefix := strings.Split(tokenInfo.Email, "@")
-		baseUsername := emailPrefix[0]
-		username := baseUsername
+	var responseData LoginResponse
 
-		for i := 1; ; i++ {
-			taken, err := s.repository.IsUsernameTaken(username)
+	user, err := s.repository.GetByGoogleId(googleUserInfo.GoogleID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			emailPrefix := strings.SplitN(googleUserInfo.Email, "@", 2)
+			baseUsername := emailPrefix[0]
+			username := baseUsername
+
+			for i := 1; ; i++ {
+				taken, err := s.repository.IsUsernameTaken(username)
+				if err != nil {
+					return nil, err
+				}
+				if !taken {
+					break
+				}
+				username = fmt.Sprintf("%s%d", baseUsername, i)
+			}
+
+			user = &userPackage.User{
+				Username:  username,
+				Name:      googleUserInfo.Name,
+				Email:     googleUserInfo.Email,
+				AvatarUrl: googleUserInfo.Picture,
+				GoogleID:  googleUserInfo.GoogleID,
+			}
+
+			token, err := utils.GenerateJWT(user.Username, user.ID)
 			if err != nil {
-				return "", err
+				return nil, err
 			}
-			if !taken {
-				break
-			}
-			username = fmt.Sprintf("%s%d", baseUsername, i)
-		}
 
-		user = &userPackage.User{
-			Username:  username,
-			Name:      name,
-			Email:     tokenInfo.Email,
-			AvatarUrl: avatarUrl,
-			GoogleID:  tokenInfo.UserID,
-		}
-		err = s.repository.Create(user)
-		if err != nil {
-			return "", err
+			err = s.repository.Create(user)
+			if err != nil {
+				return nil, err
+			}
+
+			responseData.UserID = user.ID
+			responseData.IsNew = true
+			responseData.Token = token
+
+			return &responseData, nil
+		} else {
+			return nil, err
 		}
 	}
 
-	return utils.GenerateJWT(user.Username, user.ID)
+	token, err := utils.GenerateJWT(user.Username, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	responseData.UserID = user.ID
+	responseData.IsNew = false
+	responseData.Token = token
+
+	return &responseData, nil
 }

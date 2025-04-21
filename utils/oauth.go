@@ -1,39 +1,42 @@
 package utils
 
 import (
-	"encoding/json"
+	"context"
 	"errors"
-	"net/http"
 	"os"
+
+	"google.golang.org/api/idtoken"
 )
 
-type GoogleTokenInfo struct {
-	Email    string `json:"email"`
-	UserID   string `json:"sub"`
-	Audience string `json:"aud"`
+type GoogleUserInfo struct {
+	Email     string
+	Name      string
+	Picture   string
+	GoogleID  string
+	Audience  string
 }
 
-func VerifyGoogleToken(idToken string) (*GoogleTokenInfo, error) {
-	resp, err := http.Get("https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("invalid ID token")
-	}
-
-	var tokenInfo GoogleTokenInfo
-	err = json.NewDecoder(resp.Body).Decode(&tokenInfo)
+func VerifyGoogleToken(idToken string) (*GoogleUserInfo, error) {
+	payload, err := idtoken.Validate(context.Background(), idToken, os.Getenv("GOOGLE_CLIENT_ID"))
 	if err != nil {
 		return nil, err
 	}
 
-	expectedAud := os.Getenv("GOOGLE_CLIENT_ID")
-	if tokenInfo.Audience != expectedAud {
-		return nil, errors.New("audience mismatch")
+	email, ok := payload.Claims["email"].(string)
+	if !ok {
+		return nil, errors.New("email not found in token")
 	}
 
-	return &tokenInfo, nil
+	name, _ := payload.Claims["name"].(string)
+	picture, _ := payload.Claims["picture"].(string)
+	googleID, _ := payload.Claims["sub"].(string)
+	aud, _ := payload.Claims["aud"].(string)
+
+	return &GoogleUserInfo{
+		Email:    email,
+		Name:     name,
+		Picture:  picture,
+		GoogleID: googleID,
+		Audience: aud,
+	}, nil
 }
