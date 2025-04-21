@@ -5,8 +5,8 @@ import (
 )
 
 type Service interface {
-	GetProfile(username string) (*User, error)
-	MyProfile(userID uint) (*User, error)
+	GetByUsername(username string) (*User, error)
+	GetByID(userID uint) (*User, error)
 	UpdateProfile(userID uint, updated *User) (*User, error)
 }
 
@@ -18,11 +18,11 @@ func NewService(repository Repository) Service {
 	return &service{repository}
 }
 
-func (s *service) GetProfile(username string) (*User, error) {
+func (s *service) GetByUsername(username string) (*User, error) {
 	return s.repository.GetByUsername(username)
 }
 
-func (s *service) MyProfile(userID uint) (*User, error) {
+func (s *service) GetByID(userID uint) (*User, error) {
 	return s.repository.Get(userID)
 }
 

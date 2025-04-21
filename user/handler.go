@@ -22,7 +22,7 @@ func NewHandler(service Service) *Handler {
 func (h *Handler) Profile(c *gin.Context) {
 	username := c.Param("username")
 
-	user, err := h.service.GetProfile(username)
+	user, err := h.service.GetByUsername(username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			response.SendError(c, http.StatusNotFound, constants.UserNotFound)
@@ -43,7 +43,7 @@ func (h *Handler) MyProfile(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.MyProfile(userID)
+	user, err := h.service.GetByID(userID)
 	if err != nil {
 		response.SendError(c, http.StatusInternalServerError, err.Error())
 		return

@@ -14,26 +14,30 @@ func AuthRoutes(r *gin.RouterGroup, authHandler *auth.Handler) {
 }
 
 func UserRoutes(r *gin.RouterGroup, userHandler *user.Handler) {
-	protected := r.Group("/").Use(middlewares.AuthMiddleware())
+	protected := r.Group("/profile", middlewares.AuthMiddleware())
 	{
-		protected.GET("/profile/:username", userHandler.Profile)
-		protected.GET("/profile/me", userHandler.MyProfile)
-		protected.PATCH("/profile/update/", userHandler.UpdateProfile)
+		protected.GET("/:username", userHandler.Profile)
+		protected.GET("/me", userHandler.MyProfile)
+		protected.PATCH("/update", userHandler.UpdateProfile)
 	}
 }
 
 func ActivityRoutes(r *gin.RouterGroup, activityHandler *activity.Handler) {
-	protected := r.Group("/").Use(middlewares.AuthMiddleware())
+	protected := r.Group("/", middlewares.AuthMiddleware())
 	{
+		activities := protected.Group("/activities")
+		activities.POST("", activityHandler.PostActivity)
+		activities.GET("/:id", activityHandler.GetActivityByID)
+		activities.GET("", activityHandler.GetAllActivities)
+
+		likes := protected.Group("/like")
+		likes.POST("", activityHandler.CreateLike)
+		likes.DELETE("", activityHandler.DeleteLike)
+
+		comments := protected.Group("/comment")
+		comments.POST("", activityHandler.CreateComment)
+		comments.DELETE("", activityHandler.DeleteComment)
+
 		protected.POST("/photos", activityHandler.UploadActivityPhoto)
-		protected.POST("/activities", activityHandler.PostActivity)
-		protected.GET("/activities/:id", activityHandler.GetActivityByID)
-		protected.GET("/activities", activityHandler.GetAllActivities)
-
-		protected.POST("/like", activityHandler.CreateLike)
-		protected.DELETE("unlike", activityHandler.DeleteLike)
-
-		protected.POST("/comment", activityHandler.CreateComment)
-		protected.DELETE("/uncomment", activityHandler.DeleteComment)
 	}
 }
