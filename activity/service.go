@@ -25,7 +25,7 @@ type Service interface {
 	DeleteLike(like *Like) error
 
 	// Comment
-	CreateComment(comment *Comment) (*CreateCommentResponse, error)
+	CreateComment(userID uint, comment *CreateCommentRequest) (*CreateCommentResponse, error)
 	DeleteComment(userID, commentID uint) (int, error)
 }
 
@@ -114,7 +114,13 @@ func (s *service) DeleteLike(like *Like) error {
 	return s.repository.DeleteLike(like)
 }
 
-func (s *service) CreateComment(comment *Comment) (*CreateCommentResponse, error) {
+func (s *service) CreateComment(userID uint, request *CreateCommentRequest) (*CreateCommentResponse, error) {
+	comment := &Comment{
+		ActivityID: request.ActivityID,
+		Text:       request.Text,
+		UserID:     userID,
+	}
+
 	err := s.repository.CreateComment(comment)
 	if err != nil {
 		return nil, err

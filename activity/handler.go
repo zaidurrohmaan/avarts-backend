@@ -215,13 +215,7 @@ func (h *Handler) CreateComment(c *gin.Context) {
 		return
 	}
 
-	comment := &Comment{
-		ActivityID: req.ActivityID,
-		Text:       req.Text,
-		UserID:     userID,
-	}
-
-	responseData, err := h.service.CreateComment(comment)
+	responseData, err := h.service.CreateComment(userID, &req)
 	if err != nil {
 		response.SendError(c, http.StatusInternalServerError, err.Error())
 		return
