@@ -17,8 +17,9 @@ type Repository interface {
 	DeletePictureByID(id uint) error
 
 	// Like
+	IsLikeExists(like *Like) (bool, error)
 	CreateLike(like *Like) error
-	IsLikeExist(activityID, userID uint) (bool, error)
+	DeleteLike(like *Like) error
 }
 
 type repository struct {
@@ -81,9 +82,13 @@ func (r *repository) CreateLike(like *Like) error {
 	return r.db.Create(like).Error
 }
 
-func (r *repository) IsLikeExist(activityID, userID uint) (bool, error) {
+func (r *repository) DeleteLike(like *Like) error {
+	return r.db.Where("activity_id = ? AND user_id = ?", like.ActivityID, like.UserID).Delete(&Like{}).Error
+}
+
+func (r *repository) IsLikeExists(like *Like) (bool, error) {
 	var count int64
-	err := r.db.Model(&Like{}).Where("activity_id = ? AND user_id = ?", activityID, userID).Count(&count).Error
+	err := r.db.Model(&Like{}).Where("activity_id = ? AND user_id = ?", like.ActivityID, like.UserID).Count(&count).Error
 	if err != nil {
 		return false, err
 	}

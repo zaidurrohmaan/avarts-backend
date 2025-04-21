@@ -5,7 +5,6 @@ import (
 	"avarts/response"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -170,7 +169,7 @@ func (h *Handler) GetAllActivities(c *gin.Context) {
 }
 
 func (h *Handler) CreateLike(c *gin.Context) {
-	log.Println("wkwkwk handler called")
+
 	idInterface, exists := c.Get("id")
 	if !exists {
 		response.SendError(c, http.StatusUnauthorized, constants.UNAUTHORIZED)
@@ -182,16 +181,27 @@ func (h *Handler) CreateLike(c *gin.Context) {
 		return
 	}
 
-	var likeRequest LikeRequest
-	err := c.ShouldBindJSON(&likeRequest)
+	var req LikeRequest
+	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		response.SendError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	like := &Like{
-		ActivityID: likeRequest.ActivityID,
+		ActivityID: req.ActivityID,
 		UserID:     userId,
+	}
+
+	isLikeExists, err := h.service.IsLikeExists(like)
+	if err != nil {
+		response.SendError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if isLikeExists {
+		response.SendError(c, http.StatusBadRequest, constants.LIKE_ALREADY_EXISTS)
+		return
 	}
 
 	err = h.service.CreateLike(like)
@@ -201,4 +211,47 @@ func (h *Handler) CreateLike(c *gin.Context) {
 	}
 
 	response.SendSuccess(c, http.StatusCreated, constants.CREATE_LIKE_SUCCESS, nil)
+}
+
+func (h *Handler) DeleteLike(c *gin.Context) {
+	idInterface, exists := c.Get("id")
+	if !exists {
+		response.SendError(c, http.StatusUnauthorized, constants.UNAUTHORIZED)
+		return
+	}
+	userId, ok := idInterface.(uint)
+	if !ok {
+		response.SendError(c, http.StatusInternalServerError, constants.INVALID_TYPE_USER_ID)
+		return
+	}
+
+	var req LikeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.SendError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	like := &Like{
+		ActivityID: req.ActivityID,
+		UserID: userId,
+	}
+
+	isLikeExists, err := h.service.IsLikeExists(like)
+	if err != nil {
+		response.SendError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if !isLikeExists {
+		response.SendError(c, http.StatusBadRequest, constants.LIKE_NOT_FOUND)
+		return
+	}
+
+	err = h.service.DeleteLike(like)
+	if err != nil {
+		response.SendError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.SendSuccess(c, http.StatusOK, constants.LIKE_DELETED, nil)
 }

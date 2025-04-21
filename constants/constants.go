@@ -27,6 +27,9 @@ const (
 
 	// LIKE
 	CREATE_LIKE_SUCCESS = "successfully create like"
+	LIKE_ALREADY_EXISTS = "like already exists"
+	LIKE_NOT_FOUND = "like not found"
+	LIKE_DELETED = "like deleted"
 
 	INVALID_TYPE_USER_ID = "invalid type: userID"
 	INVALID_TYPE_ACTIVITY_ID = "invalid type: activityID"
