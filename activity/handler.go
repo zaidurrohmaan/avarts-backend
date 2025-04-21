@@ -23,7 +23,7 @@ func NewHandler(service Service) *Handler {
 func (h *Handler) UploadActivityPhoto(c *gin.Context) {
 	file, err := c.FormFile("photo")
 	if err != nil {
-		response.SendError(c, http.StatusBadRequest, constants.PhotoFileRequired)
+		response.Failed(c, http.StatusBadRequest, constants.PhotoFileRequired)
 		return
 	}
 
@@ -31,18 +31,18 @@ func (h *Handler) UploadActivityPhoto(c *gin.Context) {
 	savePath := "./uploads/" + filename
 
 	if err := c.SaveUploadedFile(file, savePath); err != nil {
-		response.SendError(c, http.StatusInternalServerError, constants.FileUploadFailed)
+		response.Failed(c, http.StatusInternalServerError, constants.FileUploadFailed)
 		return
 	}
 
 	fileURL := fmt.Sprintf("http://localhost:8080/uploads/%s", filename)
-	response.SendSuccess(c, http.StatusOK, constants.FileUploadSuccess, fileURL)
+	response.Success(c, http.StatusOK, constants.FileUploadSuccess, fileURL)
 }
 
 func (h *Handler) PostActivity(c *gin.Context) {
 	var req CreateActivityRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.SendError(c, http.StatusBadRequest, constants.InvalidRequestFormat)
+		response.Failed(c, http.StatusBadRequest, constants.InvalidRequestFormat)
 		return
 	}
 
@@ -53,14 +53,15 @@ func (h *Handler) PostActivity(c *gin.Context) {
 
 	activityID, statusCode, err := h.service.CreateActivity(userID, &req)
 	if err != nil {
-		response.SendError(c, statusCode, err.Error())
+		response.Failed(c, statusCode, err.Error())
+		return
 	}
 
 	responseData := &CreateActivityResponse{
 		ActivityID: *activityID,
 	}
 
-	response.SendSuccess(c, http.StatusCreated, constants.ActivityCreateSuccess, responseData)
+	response.Success(c, http.StatusCreated, constants.ActivityCreateSuccess, responseData)
 }
 
 func (h *Handler) GetActivityByID(c *gin.Context) {
@@ -68,17 +69,18 @@ func (h *Handler) GetActivityByID(c *gin.Context) {
 
 	id, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
-		response.SendError(c, http.StatusBadRequest, constants.InvalidRequestFormat)
+		response.Failed(c, http.StatusBadRequest, constants.InvalidRequestFormat)
 		return
 	}
 	activityID := uint(id)
 
 	responseData, statusCode, err := h.service.GetByID(&activityID)
 	if err != nil {
-		response.SendError(c, statusCode, err.Error())
+		response.Failed(c, statusCode, err.Error())
+		return
 	}
 
-	response.SendSuccess(c, statusCode, constants.ActivityFetchSuccess, responseData)
+	response.Success(c, statusCode, constants.ActivityFetchSuccess, responseData)
 }
 
 func (h *Handler) GetAllActivities(c *gin.Context) {
@@ -92,10 +94,11 @@ func (h *Handler) GetAllActivities(c *gin.Context) {
 
 	responseData, statusCode, err := h.service.GetAll(userID)
 	if err != nil {
-		response.SendError(c, statusCode, err.Error())
+		response.Failed(c, statusCode, err.Error())
+		return
 	}
 
-	response.SendSuccess(c, statusCode, constants.ActivityFetchSuccess, responseData)
+	response.Success(c, statusCode, constants.ActivityFetchSuccess, responseData)
 }
 
 func (h *Handler) CreateLike(c *gin.Context) {
@@ -107,17 +110,17 @@ func (h *Handler) CreateLike(c *gin.Context) {
 	var req LikeRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		response.SendError(c, http.StatusBadRequest, err.Error())
+		response.Failed(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	statusCode, err := h.service.CreateLike(userID, &req)
 	if err != nil {
-		response.SendError(c, statusCode, err.Error())
+		response.Failed(c, statusCode, err.Error())
 		return
 	}
 
-	response.SendSuccess(c, statusCode, constants.LikeCreateSuccess, nil)
+	response.Success(c, statusCode, constants.LikeCreateSuccess, nil)
 }
 
 func (h *Handler) DeleteLike(c *gin.Context) {
@@ -128,23 +131,23 @@ func (h *Handler) DeleteLike(c *gin.Context) {
 
 	var req LikeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.SendError(c, http.StatusInternalServerError, err.Error())
+		response.Failed(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	err := h.service.DeleteLike(userID, &req)
 	if err != nil {
-		response.SendError(c, http.StatusInternalServerError, err.Error())
+		response.Failed(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	response.SendSuccess(c, http.StatusOK, constants.LikeDeleted, nil)
+	response.Success(c, http.StatusOK, constants.LikeDeleted, nil)
 }
 
 func (h *Handler) CreateComment(c *gin.Context) {
 	var req CreateCommentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.SendError(c, http.StatusInternalServerError, err.Error())
+		response.Failed(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -155,11 +158,11 @@ func (h *Handler) CreateComment(c *gin.Context) {
 
 	responseData, err := h.service.CreateComment(userID, &req)
 	if err != nil {
-		response.SendError(c, http.StatusInternalServerError, err.Error())
+		response.Failed(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	response.SendSuccess(c, http.StatusCreated, constants.CommentCreateSuccess, responseData)
+	response.Success(c, http.StatusCreated, constants.CommentCreateSuccess, responseData)
 }
 
 func (h *Handler) DeleteComment(c *gin.Context) {
@@ -170,14 +173,14 @@ func (h *Handler) DeleteComment(c *gin.Context) {
 
 	var req DeleteCommentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.SendError(c, http.StatusInternalServerError, err.Error())
+		response.Failed(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	statusCode, err := h.service.DeleteComment(userID, req.CommentID)
 	if err != nil {
-		response.SendError(c, statusCode, err.Error())
+		response.Failed(c, statusCode, err.Error())
 		return
 	}
-	response.SendSuccess(c, statusCode, constants.CommentDeleteSuccess, nil)
+	response.Success(c, statusCode, constants.CommentDeleteSuccess, nil)
 }

@@ -20,15 +20,15 @@ func (h *Handler) GoogleLogin(c *gin.Context) {
 	var req GoogleLoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil || req.IdToken == "" {
-		response.SendError(c, http.StatusBadRequest, constants.MissingIDToken)
+		response.Failed(c, http.StatusBadRequest, constants.MissingIDToken)
 		return
 	}
 
 	LoginResponse, err := h.service.LoginWithGoogle(req.IdToken)
 	if err != nil {
-		response.SendError(c, http.StatusUnauthorized, err.Error())
+		response.Failed(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	response.SendSuccess(c, http.StatusOK, constants.LoginSuccess, LoginResponse)
+	response.Success(c, http.StatusOK, constants.LoginSuccess, LoginResponse)
 }

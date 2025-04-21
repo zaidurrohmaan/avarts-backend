@@ -25,16 +25,16 @@ func (h *Handler) Profile(c *gin.Context) {
 	user, err := h.service.GetByUsername(username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			response.SendError(c, http.StatusNotFound, constants.UserNotFound)
+			response.Failed(c, http.StatusNotFound, constants.UserNotFound)
 		} else {
-			response.SendError(c, http.StatusInternalServerError, err.Error())
+			response.Failed(c, http.StatusInternalServerError, err.Error())
 		}
 		return
 	}
 
 	userResponse := GenerateUserResponse(user)
 
-	response.SendSuccess(c, http.StatusOK, constants.UserFetchSuccess, userResponse)
+	response.Success(c, http.StatusOK, constants.UserFetchSuccess, userResponse)
 }
 
 func (h *Handler) MyProfile(c *gin.Context) {
@@ -45,12 +45,12 @@ func (h *Handler) MyProfile(c *gin.Context) {
 
 	user, err := h.service.GetByID(userID)
 	if err != nil {
-		response.SendError(c, http.StatusInternalServerError, err.Error())
+		response.Failed(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	userResponse := GenerateUserResponse(user)
 
-	response.SendSuccess(c, http.StatusOK, constants.UserFetchSuccess, userResponse)
+	response.Success(c, http.StatusOK, constants.UserFetchSuccess, userResponse)
 }
 
 func (h *Handler) UpdateProfile(c *gin.Context) {
@@ -61,16 +61,16 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 
 	var input User
 	if err := c.ShouldBindJSON(&input); err != nil {
-		response.SendError(c, http.StatusBadRequest, err.Error())
+		response.Failed(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user, err := h.service.UpdateProfile(userID, &input)
 	if err != nil {
-		response.SendError(c, http.StatusInternalServerError, err.Error())
+		response.Failed(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	userResponse := GenerateUserResponse(user)
 
-	response.SendSuccess(c, http.StatusOK, constants.UserUpdateSuccess, userResponse)
+	response.Success(c, http.StatusOK, constants.UserUpdateSuccess, userResponse)
 }

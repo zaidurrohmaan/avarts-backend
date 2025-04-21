@@ -41,13 +41,13 @@ func ParseJWT(tokenStr string) (uint, string, error) {
 func GetUserIDFromJWT(c *gin.Context) (uint, bool) {
 	idInterface, exists := c.Get("id")
 	if !exists {
-		response.SendError(c, http.StatusUnauthorized, constants.Unauthorized)
+		response.Failed(c, http.StatusUnauthorized, constants.Unauthorized)
 		return 0, true
 	}
 
 	userId, ok := idInterface.(uint)
 	if !ok {
-		response.SendError(c, http.StatusInternalServerError, constants.InvalidRequestFormat)
+		response.Failed(c, http.StatusInternalServerError, constants.InvalidRequestFormat)
 		return 0, true
 	}
 
