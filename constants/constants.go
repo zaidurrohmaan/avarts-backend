@@ -5,31 +5,30 @@ const (
 	STATUS_FAILED = "failed"
 
 	// USER
-	USER_FOUND_SUCCESS = "Successfully fetch user data"
-	USER_NOT_FOUND = "User not found"
-	USER_UPDATE_SUCCESS = "Successfully update user data"
+	USER_FOUND_SUCCESS = "successfully fetch user data"
+	USER_NOT_FOUND = "user not found"
+	USER_UPDATE_SUCCESS = "successfully update user data"
 
 	// ACTIVITY & PHOTO
-	CREATE_ACTIVITY_SUCCESS = "Success to create activity"
-	CREATE_ACTIVITY_SUCCESS_WITH_WARNING = "Success to create activity. Failed to retrieve activity data."
-	CREATE_ACTIVITY_FAILED = "Failed to create activity"
-	ACTIVITY_NOT_FOUND = "Activity not found"
-	ACTIVITY_FOUND_SUCCESS = "Successfully fetch activity data"
-	PHOTO_FILE_REQUIRED = "Photo file required"
-	SAVE_PHOTO_METADATA_FAILED = "Failed to save picture metadata"
-	UPLOAD_FILE_FAILED = "Failed to upload file"
-	UPLOAD_FILE_SUCCESS = "Success to upload file"
+	CREATE_ACTIVITY_SUCCESS = "success to create activity"
+	CREATE_ACTIVITY_SUCCESS_WITH_WARNING = "success to create activity. Failed to retrieve activity data."
+	CREATE_ACTIVITY_FAILED = "failed to create activity"
+	ACTIVITY_NOT_FOUND = "activity not found"
+	ACTIVITY_FOUND_SUCCESS = "successfully fetch activity data"
+	PHOTO_FILE_REQUIRED = "photo file required"
+	SAVE_PHOTO_METADATA_FAILED = "failed to save picture metadata"
+	UPLOAD_FILE_FAILED = "failed to upload file"
+	UPLOAD_FILE_SUCCESS = "success to upload file"
 
 	// AUTH
-	LOGIN_SUCCESS = "Successfully login"
-	UNAUTHORIZED = "Unauthorized"
-	MISSING_ID_TOKEN = "Missing ID token"
+	LOGIN_SUCCESS = "successfully login"
+	UNAUTHORIZED = "unauthorized"
+	MISSING_ID_TOKEN = "missing ID token"
 
 	// LIKE
-	CREATE_LIKE_SUCCESS = "Successfully create like"
+	CREATE_LIKE_SUCCESS = "successfully create like"
 
-	INVALID_TYPE_USER_ID = "Invalid type: userID"
-	INVALID_TYPE_ACTIVITY_ID = "Invalid type: activityID"
-	INVALID_REQUEST = "Invalid request"
-
+	INVALID_TYPE_USER_ID = "invalid type: userID"
+	INVALID_TYPE_ACTIVITY_ID = "invalid type: activityID"
+	INVALID_REQUEST = "invalid request"
 )
