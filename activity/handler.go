@@ -178,23 +178,7 @@ func (h *Handler) DeleteLike(c *gin.Context) {
 		return
 	}
 
-	like := &Like{
-		ActivityID: req.ActivityID,
-		UserID:     userID,
-	}
-
-	isLikeExists, err := h.service.IsLikeExists(like)
-	if err != nil {
-		response.SendError(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if !isLikeExists {
-		response.SendError(c, http.StatusBadRequest, constants.LikeNotFound)
-		return
-	}
-
-	err = h.service.DeleteLike(like)
+	err := h.service.DeleteLike(userID, &req)
 	if err != nil {
 		response.SendError(c, http.StatusInternalServerError, err.Error())
 		return

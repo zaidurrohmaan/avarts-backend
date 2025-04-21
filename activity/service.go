@@ -22,7 +22,7 @@ type Service interface {
 	// Like
 	IsLikeExists(like *Like) (bool, error)
 	CreateLike(like *Like) error
-	DeleteLike(like *Like) error
+	DeleteLike(userID uint, like *LikeRequest) error
 
 	// Comment
 	CreateComment(userID uint, comment *CreateCommentRequest) (*CreateCommentResponse, error)
@@ -110,8 +110,27 @@ func (s *service) CreateLike(like *Like) error {
 	return s.repository.CreateLike(like)
 }
 
-func (s *service) DeleteLike(like *Like) error {
-	return s.repository.DeleteLike(like)
+func (s *service) DeleteLike(userID uint, request *LikeRequest) error {
+	like := &Like {
+		ActivityID: request.ActivityID,
+		UserID: userID,
+	}
+
+	isLikeExists, err := s.repository.IsLikeExists(like)
+	if err != nil {
+		return err
+	}
+
+	if !isLikeExists {
+		return errors.New(constants.LikeNotFound)
+	}
+	
+	err = s.repository.DeleteLike(like)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *service) CreateComment(userID uint, request *CreateCommentRequest) (*CreateCommentResponse, error) {
