@@ -34,5 +34,6 @@ func ActivityRoutes(r *gin.RouterGroup, activityHandler *activity.Handler) {
 		protected.DELETE("unlike", activityHandler.DeleteLike)
 
 		protected.POST("/comment", activityHandler.CreateComment)
+		protected.DELETE("/uncomment", activityHandler.DeleteComment)
 	}
 }

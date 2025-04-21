@@ -47,12 +47,12 @@ type Comment struct {
 	ActivityID uint      `gorm:"not null" json:"activity_id"`
 	UserID     uint      `gorm:"not null" json:"user_id"`
 	Text       string    `gorm:"type:text;not null" json:"text"`
-	User       user.User `gorm:"foreignKey:UserID"`
+	Activity   Activity  `gorm:"foreingKey:ActivityID"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
-type CommentRequest struct {
+type CreateCommentRequest struct {
 	ActivityID uint   `json:"activity_id"`
 	Text       string `json:"text"`
 }
@@ -62,6 +62,10 @@ type CreateCommentResponse struct {
 	UserID     uint   `json:"user_id"`
 	ActivityID uint   `json:"activity_id"`
 	Text       string `json:"text"`
+}
+
+type DeleteCommentRequest struct {
+	CommentID uint `json:"comment_id"`
 }
 
 type CreateActivityRequest struct {

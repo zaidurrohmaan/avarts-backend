@@ -1,5 +1,11 @@
 package activity
 
+import (
+	"avarts/constants"
+	"errors"
+	"net/http"
+)
+
 type Service interface {
 	// Activity
 	CreateActivity(activity *Activity) error
@@ -19,6 +25,7 @@ type Service interface {
 
 	// Comment
 	CreateComment(comment *Comment) (*CreateCommentResponse, error)
+	DeleteComment(userID, commentID uint) (int, error)
 }
 
 type service struct {
@@ -75,12 +82,32 @@ func (s *service) CreateComment(comment *Comment) (*CreateCommentResponse, error
 		return nil, err
 	}
 
-	response := &CreateCommentResponse {
-		ID: comment.ID,
-		UserID: comment.UserID,
+	response := &CreateCommentResponse{
+		ID:         comment.ID,
+		UserID:     comment.UserID,
 		ActivityID: comment.ActivityID,
-		Text: comment.Text,
+		Text:       comment.Text,
 	}
 
 	return response, nil
+}
+
+func (s *service) DeleteComment(userID, commentID uint) (int, error) {
+	comment, err := s.repository.GetCommentWithActivity(commentID)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	commentOwner := comment.UserID
+	activityOwner := comment.Activity.UserID
+
+	if userID == commentOwner || userID == activityOwner {
+		err = s.repository.DeleteComment(commentID)
+		if err != nil {
+			return http.StatusInternalServerError, err
+		}
+		return http.StatusOK, nil
+	}
+
+	return http.StatusForbidden, errors.New(constants.DELETE_COMMENT_ACCESS_DENIED)
 }

@@ -32,8 +32,10 @@ const (
 	LIKE_DELETED = "like deleted"
 
 	// COMMENT
-	CREATED_COMMENT_SUCCESS = "successfully create comment"
-	CREATED_COMMENT_FAILED = "failed to create comment"
+	CREATE_COMMENT_SUCCESS = "successfully create comment"
+	CREATE_COMMENT_FAILED = "failed to create comment"
+	DELETE_COMMENT_SUCCESS = "comment deleted"
+	DELETE_COMMENT_ACCESS_DENIED = "access denied: not allowed to delete this comment"
 
 	INVALID_TYPE_USER_ID = "invalid type: userID"
 	INVALID_TYPE_ACTIVITY_ID = "invalid type: activityID"

@@ -22,8 +22,9 @@ type Repository interface {
 	DeleteLike(like *Like) error
 
 	// Comment
-	GetComment(commentID uint) (*Comment, error)
+	GetCommentWithActivity(commentID uint) (*Comment, error)
 	CreateComment(comment *Comment) error
+	DeleteComment(commentID uint) error
 }
 
 type repository struct {
@@ -99,9 +100,9 @@ func (r *repository) IsLikeExists(like *Like) (bool, error) {
 	return count > 0, nil
 }
 
-func (r *repository) GetComment(commentID uint) (*Comment, error) {
+func (r *repository) GetCommentWithActivity(commentID uint) (*Comment, error) {
 	var comment Comment
-	err := r.db.Preload("User").First(&comment, commentID).Error
+	err := r.db.Preload("Activity").First(&comment, commentID).Error
 	if err != nil {
 		return nil, err
 	}
@@ -110,4 +111,8 @@ func (r *repository) GetComment(commentID uint) (*Comment, error) {
 
 func (r *repository) CreateComment(comment *Comment) error {
 	return r.db.Create(comment).Error
+}
+
+func (r *repository) DeleteComment(commentID uint) error {
+	return r.db.Delete(&Comment{}, commentID).Error
 }

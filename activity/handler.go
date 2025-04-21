@@ -257,7 +257,7 @@ func (h *Handler) DeleteLike(c *gin.Context) {
 }
 
 func (h *Handler) CreateComment(c *gin.Context) {
-	var req CommentRequest
+	var req CreateCommentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.SendError(c, http.StatusInternalServerError, err.Error())
 		return
@@ -274,7 +274,7 @@ func (h *Handler) CreateComment(c *gin.Context) {
 		return
 	}
 
-	comment := &Comment{
+	comment := &Comment {
 		ActivityID: req.ActivityID,
 		Text: req.Text,
 		UserID: userId,
@@ -286,5 +286,31 @@ func (h *Handler) CreateComment(c *gin.Context) {
 		return
 	}
 
-	response.SendSuccess(c, http.StatusCreated, constants.CREATED_COMMENT_SUCCESS, responseData)
+	response.SendSuccess(c, http.StatusCreated, constants.CREATE_COMMENT_SUCCESS, responseData)
+}
+
+func (h *Handler) DeleteComment(c *gin.Context) {
+	idInterface, exists := c.Get("id")
+	if !exists {
+		response.SendError(c, http.StatusUnauthorized, constants.UNAUTHORIZED)
+		return
+	}
+	userId, ok := idInterface.(uint)
+	if !ok {
+		response.SendError(c, http.StatusInternalServerError, constants.INVALID_TYPE_USER_ID)
+		return
+	}
+
+	var req DeleteCommentRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.SendError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	statusCode, err := h.service.DeleteComment(userId, req.CommentID)
+	if err != nil {
+		response.SendError(c, statusCode, err.Error())
+		return
+	}
+	response.SendSuccess(c, statusCode, constants.DELETE_COMMENT_SUCCESS, nil)
 }
