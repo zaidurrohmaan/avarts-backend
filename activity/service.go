@@ -5,13 +5,15 @@ import (
 	"errors"
 	"net/http"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Service interface {
 	// Activity
 	CreateActivity(userID uint, activity *CreateActivityRequest) (*uint, int, error)
-	GetByID(activityID *uint) (*Activity, error)
-	GetAll(userID *uint) (*[]ActivityResponse, error)
+	GetByID(activityID *uint) (*ActivityResponse, int, error)
+	GetAll(userID *uint) (*[]ActivityResponse, int, error)
 	DeleteActivityByID(activityID uint) error
 
 	// Picture
@@ -81,14 +83,32 @@ func (s *service) CreatePicture(picture *Picture) error {
 	return s.repository.CreatePicture(picture)
 }
 
-func (s *service) GetByID(activityID *uint) (*Activity, error) {
-	return s.repository.GetByID(activityID)
+func (s *service) GetByID(activityID *uint) (*ActivityResponse, int, error) {
+	activity, err := s.repository.GetByID(activityID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, http.StatusNotFound, errors.New(constants.ActivityNotFound)
+		} else {
+			return nil, http.StatusInternalServerError, err
+		}
+	}
+	activityResponse := GenerateActivityResponse(activity)
+	pictureUrls, err := s.repository.GetPictureUrlsByActivityID(activityID)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+	activityResponse.PictureURLs = *pictureUrls
+
+	return &activityResponse, http.StatusOK, nil
 }
 
-func (s *service) GetAll(userID *uint) (*[]ActivityResponse, error) {
+func (s *service) GetAll(userID *uint) (*[]ActivityResponse, int, error) {
 	activities, err := s.repository.GetAll(userID)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, http.StatusNotFound, errors.New(constants.ActivityNotFound)
+		}
+		return nil, http.StatusInternalServerError, err
 	}
 
 	var activitiesResponse []ActivityResponse
@@ -97,13 +117,13 @@ func (s *service) GetAll(userID *uint) (*[]ActivityResponse, error) {
 		activityID := activityResponse.ID
 		pictureUrls, err := s.repository.GetPictureUrlsByActivityID(&activityID)
 		if err != nil {
-			return nil, err
+			return nil, http.StatusInternalServerError, err
 		}
 		activityResponse.PictureURLs = *pictureUrls
 		activitiesResponse = append(activitiesResponse, activityResponse)
 	}
 
-	return &activitiesResponse, nil
+	return &activitiesResponse, http.StatusOK, nil
 }
 
 func (s *service) GetPictureUrlsByActivityID(activityID *uint) (*[]string, error) {

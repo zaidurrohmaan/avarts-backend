@@ -4,14 +4,12 @@ import (
 	"avarts/constants"
 	"avarts/response"
 	"avarts/utils"
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type Handler struct {
@@ -58,7 +56,7 @@ func (h *Handler) PostActivity(c *gin.Context) {
 		response.SendError(c, statusCode, err.Error())
 	}
 
-	responseData := &CreateActivityResponse {
+	responseData := &CreateActivityResponse{
 		ActivityID: *activityID,
 	}
 
@@ -73,28 +71,14 @@ func (h *Handler) GetActivityByID(c *gin.Context) {
 		response.SendError(c, http.StatusBadRequest, constants.InvalidRequestFormat)
 		return
 	}
-
 	activityID := uint(id)
 
-	activity, err := h.service.GetByID(&activityID)
+	responseData, statusCode, err := h.service.GetByID(&activityID)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			response.SendError(c, http.StatusNotFound, constants.ActivityNotFound)
-			return
-		} else {
-			response.SendError(c, http.StatusInternalServerError, err.Error())
-			return
-		}
+		response.SendError(c, statusCode, err.Error())
 	}
-	activityResponse := GenerateActivityResponse(activity)
-	pictureUrls, err := h.service.GetPictureUrlsByActivityID(&activityID)
-	if err != nil {
-		response.SendError(c, http.StatusInternalServerError, err.Error())
-		return
-	}
-	activityResponse.PictureURLs = *pictureUrls
 
-	response.SendSuccess(c, http.StatusOK, constants.ActivityFetchSuccess, activityResponse)
+	response.SendSuccess(c, statusCode, constants.ActivityFetchSuccess, responseData)
 }
 
 func (h *Handler) GetAllActivities(c *gin.Context) {
@@ -106,12 +90,12 @@ func (h *Handler) GetAllActivities(c *gin.Context) {
 		}
 	}
 
-	responseData, err := h.service.GetAll(userID)
+	responseData, statusCode, err := h.service.GetAll(userID)
 	if err != nil {
-		response.SendError(c, http.StatusInternalServerError, err.Error())
+		response.SendError(c, statusCode, err.Error())
 	}
 
-	response.SendSuccess(c, http.StatusOK, constants.ActivityFetchSuccess, responseData)
+	response.SendSuccess(c, statusCode, constants.ActivityFetchSuccess, responseData)
 }
 
 func (h *Handler) CreateLike(c *gin.Context) {
