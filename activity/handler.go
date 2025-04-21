@@ -53,59 +53,16 @@ func (h *Handler) PostActivity(c *gin.Context) {
 		return
 	}
 
-	startTime, _ := time.Parse(time.RFC3339, req.StartTime)
-	endTime, _ := time.Parse(time.RFC3339, req.EndTime)
-	date, _ := time.Parse("2006-01-02", req.Date)
-
-	activity := Activity{
-		UserID:       userID,
-		Title:        req.Title,
-		Caption:      req.Caption,
-		Distance:     req.Distance,
-		Pace:         req.Pace,
-		StepsCount:   req.StepsCount,
-		StartTime:    startTime,
-		EndTime:      endTime,
-		Location:     req.Location,
-		ActivityType: req.ActivityType,
-		Date:         date,
-	}
-
-	// Save activity
-	if err := h.service.CreateActivity(&activity); err != nil {
-		response.SendError(c, http.StatusInternalServerError, constants.ActivityCreateFailed)
-		return
-	}
-
-	// Map PictureUrls to ActivityID
-	for _, url := range req.PictureURLs {
-		pic := Picture{
-			ActivityID: activity.ID,
-			URL:        url,
-		}
-		if err := h.service.CreatePicture(&pic); err != nil {
-			// Rollback: delete the activity, and all associated pictures will be automatically deleted as well
-			_ = h.service.DeleteActivityByID(activity.ID)
-			response.SendError(c, http.StatusInternalServerError, constants.ActivityCreateFailed)
-			return
-		}
-	}
-
-	newActivity, err := h.service.GetByID(&activity.ID)
+	activityID, statusCode, err := h.service.CreateActivity(userID, &req)
 	if err != nil {
-		response.SendSuccessWithWarning(c, constants.ActivityCreateSuccessWithWarning)
-		return
+		response.SendError(c, statusCode, err.Error())
 	}
-	newActivityResponse := GenerateActivityResponse(newActivity)
 
-	pictureUrls, err := h.service.GetPictureUrlsByActivityID(&activity.ID)
-	if err != nil {
-		response.SendSuccessWithWarning(c, constants.ActivityCreateSuccessWithWarning)
-		return
+	responseData := &CreateActivityResponse {
+		ActivityID: *activityID,
 	}
-	newActivityResponse.PictureURLs = *pictureUrls
 
-	response.SendSuccess(c, http.StatusCreated, constants.ActivityCreateSuccess, newActivityResponse)
+	response.SendSuccess(c, http.StatusCreated, constants.ActivityCreateSuccess, responseData)
 }
 
 func (h *Handler) GetActivityByID(c *gin.Context) {

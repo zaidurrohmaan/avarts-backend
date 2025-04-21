@@ -82,6 +82,10 @@ type CreateActivityRequest struct {
 	PictureURLs  []string `json:"picture_urls"`
 }
 
+type CreateActivityResponse struct {
+	ActivityID uint `json:"activity_id"`
+}
+
 type ActivityUserResponse struct {
 	ID        uint   `json:"id"`
 	Username  string `json:"username"`
