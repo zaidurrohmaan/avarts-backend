@@ -14,12 +14,6 @@ type Service interface {
 	CreateActivity(userID uint, activity *CreateActivityRequest) (*uint, int, error)
 	GetByID(activityID *uint) (*ActivityResponse, int, error)
 	GetAll(userID *uint) (*[]ActivityResponse, int, error)
-	DeleteActivityByID(activityID uint) error
-
-	// Picture
-	CreatePicture(picture *Picture) error
-	GetPictureUrlsByActivityID(activityID *uint) (*[]string, error)
-	DeletePictureByID(id uint) error
 
 	// Like
 	CreateLike(userID uint, like *LikeRequest) (int, error)
@@ -79,10 +73,6 @@ func (s *service) CreateActivity(userID uint, request *CreateActivityRequest) (*
 	return &activity.ID, http.StatusCreated, nil
 }
 
-func (s *service) CreatePicture(picture *Picture) error {
-	return s.repository.CreatePicture(picture)
-}
-
 func (s *service) GetByID(activityID *uint) (*ActivityResponse, int, error) {
 	activity, err := s.repository.GetByID(activityID)
 	if err != nil {
@@ -124,18 +114,6 @@ func (s *service) GetAll(userID *uint) (*[]ActivityResponse, int, error) {
 	}
 
 	return &activitiesResponse, http.StatusOK, nil
-}
-
-func (s *service) GetPictureUrlsByActivityID(activityID *uint) (*[]string, error) {
-	return s.repository.GetPictureUrlsByActivityID(activityID)
-}
-
-func (s *service) DeletePictureByID(id uint) error {
-	return s.repository.DeletePictureByID(id)
-}
-
-func (s *service) DeleteActivityByID(activityID uint) error {
-	return s.repository.DeleteActivityByID(activityID)
 }
 
 func (s *service) CreateLike(userID uint, request *LikeRequest) (int, error) {
