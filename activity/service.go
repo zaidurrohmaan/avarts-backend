@@ -16,6 +16,9 @@ type Service interface {
 	IsLikeExists(like *Like) (bool, error)
 	CreateLike(like *Like) error
 	DeleteLike(like *Like) error
+
+	// Comment
+	CreateComment(comment *Comment) (*CreateCommentResponse, error)
 }
 
 type service struct {
@@ -64,4 +67,20 @@ func (s *service) CreateLike(like *Like) error {
 
 func (s *service) DeleteLike(like *Like) error {
 	return s.repository.DeleteLike(like)
+}
+
+func (s *service) CreateComment(comment *Comment) (*CreateCommentResponse, error) {
+	err := s.repository.CreateComment(comment)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateCommentResponse {
+		ID: comment.ID,
+		UserID: comment.UserID,
+		ActivityID: comment.ActivityID,
+		Text: comment.Text,
+	}
+
+	return response, nil
 }

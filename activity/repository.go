@@ -20,6 +20,10 @@ type Repository interface {
 	IsLikeExists(like *Like) (bool, error)
 	CreateLike(like *Like) error
 	DeleteLike(like *Like) error
+
+	// Comment
+	GetComment(commentID uint) (*Comment, error)
+	CreateComment(comment *Comment) error
 }
 
 type repository struct {
@@ -93,4 +97,17 @@ func (r *repository) IsLikeExists(like *Like) (bool, error) {
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (r *repository) GetComment(commentID uint) (*Comment, error) {
+	var comment Comment
+	err := r.db.Preload("User").First(&comment, commentID).Error
+	if err != nil {
+		return nil, err
+	}
+	return &comment, nil
+}
+
+func (r *repository) CreateComment(comment *Comment) error {
+	return r.db.Create(comment).Error
 }

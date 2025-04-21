@@ -32,14 +32,36 @@ type Picture struct {
 }
 
 type Like struct {
-	ID uint `gorm:"primaryKey;autoIncrement" json:"id"`
-	ActivityID uint `gorm:"not null" json:"activity_id"`
-	UserID uint `gorm:"not null" json:"user_id"`
-	CreatedAt time.Time `json:"created_at"`
+	ID         uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	ActivityID uint      `gorm:"not null" json:"activity_id"`
+	UserID     uint      `gorm:"not null" json:"user_id"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 type LikeRequest struct {
 	ActivityID uint `json:"activity_id" binding:"required"`
+}
+
+type Comment struct {
+	ID         uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	ActivityID uint      `gorm:"not null" json:"activity_id"`
+	UserID     uint      `gorm:"not null" json:"user_id"`
+	Text       string    `gorm:"type:text;not null" json:"text"`
+	User       user.User `gorm:"foreignKey:UserID"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+}
+
+type CommentRequest struct {
+	ActivityID uint   `json:"activity_id"`
+	Text       string `json:"text"`
+}
+
+type CreateCommentResponse struct {
+	ID         uint   `json:"comment_id"`
+	UserID     uint   `json:"user_id"`
+	ActivityID uint   `json:"activity_id"`
+	Text       string `json:"text"`
 }
 
 type CreateActivityRequest struct {
@@ -76,15 +98,15 @@ type ActivityResponse struct {
 	Location     string               `json:"location"`
 	ActivityType string               `json:"activity_type"`
 	Date         time.Time            `json:"date"`
-	PictureURLs    []string             `json:"picture_urls"`
+	PictureURLs  []string             `json:"picture_urls"`
 }
 
 func MigrateActivity(db *gorm.DB) {
-	db.AutoMigrate(&Activity{}, &Picture{}, &Like{})
+	db.AutoMigrate(&Activity{}, &Picture{}, &Like{}, &Comment{})
 }
 
 func GenerateActivityResponse(activityData *Activity) ActivityResponse {
-	
+
 	response := ActivityResponse{
 		ID: activityData.ID,
 		User: ActivityUserResponse{

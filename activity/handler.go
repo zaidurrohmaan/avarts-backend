@@ -255,3 +255,36 @@ func (h *Handler) DeleteLike(c *gin.Context) {
 
 	response.SendSuccess(c, http.StatusOK, constants.LIKE_DELETED, nil)
 }
+
+func (h *Handler) CreateComment(c *gin.Context) {
+	var req CommentRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.SendError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	idInterface, exists := c.Get("id")
+	if !exists {
+		response.SendError(c, http.StatusUnauthorized, constants.UNAUTHORIZED)
+		return
+	}
+	userId, ok := idInterface.(uint)
+	if !ok {
+		response.SendError(c, http.StatusInternalServerError, constants.INVALID_TYPE_USER_ID)
+		return
+	}
+
+	comment := &Comment{
+		ActivityID: req.ActivityID,
+		Text: req.Text,
+		UserID: userId,
+	}
+
+	responseData, err := h.service.CreateComment(comment)
+	if err != nil {
+		response.SendError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.SendSuccess(c, http.StatusCreated, constants.CREATED_COMMENT_SUCCESS, responseData)
+}

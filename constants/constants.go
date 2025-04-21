@@ -31,6 +31,10 @@ const (
 	LIKE_NOT_FOUND = "like not found"
 	LIKE_DELETED = "like deleted"
 
+	// COMMENT
+	CREATED_COMMENT_SUCCESS = "successfully create comment"
+	CREATED_COMMENT_FAILED = "failed to create comment"
+
 	INVALID_TYPE_USER_ID = "invalid type: userID"
 	INVALID_TYPE_ACTIVITY_ID = "invalid type: activityID"
 	INVALID_REQUEST = "invalid request"
