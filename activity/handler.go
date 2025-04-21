@@ -106,26 +106,12 @@ func (h *Handler) GetAllActivities(c *gin.Context) {
 		}
 	}
 
-	activities, err := h.service.GetAll(userID)
+	responseData, err := h.service.GetAll(userID)
 	if err != nil {
-		response.SendError(c, http.StatusInternalServerError, constants.ActivityNotFound)
-		return
+		response.SendError(c, http.StatusInternalServerError, err.Error())
 	}
 
-	var activitiesResponse []ActivityResponse
-	for _, activity := range *activities {
-		activityResponse := GenerateActivityResponse(&activity)
-		activityID := activityResponse.ID
-		pictureUrls, err := h.service.GetPictureUrlsByActivityID(&activityID)
-		if err != nil {
-			response.SendError(c, http.StatusInternalServerError, err.Error())
-			return
-		}
-		activityResponse.PictureURLs = *pictureUrls
-		activitiesResponse = append(activitiesResponse, activityResponse)
-	}
-
-	response.SendSuccess(c, http.StatusOK, constants.ActivityFetchSuccess, activitiesResponse)
+	response.SendSuccess(c, http.StatusOK, constants.ActivityFetchSuccess, responseData)
 }
 
 func (h *Handler) CreateLike(c *gin.Context) {

@@ -11,7 +11,7 @@ type Service interface {
 	// Activity
 	CreateActivity(userID uint, activity *CreateActivityRequest) (*uint, int, error)
 	GetByID(activityID *uint) (*Activity, error)
-	GetAll(userID *uint) (*[]Activity, error)
+	GetAll(userID *uint) (*[]ActivityResponse, error)
 	DeleteActivityByID(activityID uint) error
 
 	// Picture
@@ -20,7 +20,6 @@ type Service interface {
 	DeletePictureByID(id uint) error
 
 	// Like
-	IsLikeExists(like *Like) (bool, error)
 	CreateLike(userID uint, like *LikeRequest) (int, error)
 	DeleteLike(userID uint, like *LikeRequest) error
 
@@ -86,8 +85,25 @@ func (s *service) GetByID(activityID *uint) (*Activity, error) {
 	return s.repository.GetByID(activityID)
 }
 
-func (s *service) GetAll(userID *uint) (*[]Activity, error) {
-	return s.repository.GetAll(userID)
+func (s *service) GetAll(userID *uint) (*[]ActivityResponse, error) {
+	activities, err := s.repository.GetAll(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var activitiesResponse []ActivityResponse
+	for _, activity := range *activities {
+		activityResponse := GenerateActivityResponse(&activity)
+		activityID := activityResponse.ID
+		pictureUrls, err := s.repository.GetPictureUrlsByActivityID(&activityID)
+		if err != nil {
+			return nil, err
+		}
+		activityResponse.PictureURLs = *pictureUrls
+		activitiesResponse = append(activitiesResponse, activityResponse)
+	}
+
+	return &activitiesResponse, nil
 }
 
 func (s *service) GetPictureUrlsByActivityID(activityID *uint) (*[]string, error) {
@@ -100,10 +116,6 @@ func (s *service) DeletePictureByID(id uint) error {
 
 func (s *service) DeleteActivityByID(activityID uint) error {
 	return s.repository.DeleteActivityByID(activityID)
-}
-
-func (s *service) IsLikeExists(like *Like) (bool, error) {
-	return s.repository.IsLikeExists(like)
 }
 
 func (s *service) CreateLike(userID uint, request *LikeRequest) (int, error) {

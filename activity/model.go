@@ -114,7 +114,6 @@ func MigrateActivity(db *gorm.DB) {
 }
 
 func GenerateActivityResponse(activityData *Activity) ActivityResponse {
-
 	response := ActivityResponse{
 		ID: activityData.ID,
 		User: ActivityUserResponse{
