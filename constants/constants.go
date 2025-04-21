@@ -1,43 +1,44 @@
 package constants
 
 const (
-	STATUS_SUCCESS = "success"
-	STATUS_FAILED = "failed"
+	// Status
+	StatusSuccess = "success"
+	StatusFailed  = "failed"
 
-	// USER
-	USER_FOUND_SUCCESS = "successfully fetch user data"
-	USER_NOT_FOUND = "user not found"
-	USER_UPDATE_SUCCESS = "successfully update user data"
+	// User
+	UserFetchSuccess  = "user data fetched"
+	UserNotFound      = "user not found"
+	UserUpdateSuccess = "user data updated"
 
-	// ACTIVITY & PHOTO
-	CREATE_ACTIVITY_SUCCESS = "success to create activity"
-	CREATE_ACTIVITY_SUCCESS_WITH_WARNING = "success to create activity. Failed to retrieve activity data."
-	CREATE_ACTIVITY_FAILED = "failed to create activity"
-	ACTIVITY_NOT_FOUND = "activity not found"
-	ACTIVITY_FOUND_SUCCESS = "successfully fetch activity data"
-	PHOTO_FILE_REQUIRED = "photo file required"
-	SAVE_PHOTO_METADATA_FAILED = "failed to save picture metadata"
-	UPLOAD_FILE_FAILED = "failed to upload file"
-	UPLOAD_FILE_SUCCESS = "success to upload file"
+	// Activity & Photo
+	ActivityCreateSuccess            = "activity created"
+	ActivityCreateSuccessWithWarning = "activity created, but failed to fetch activity data"
+	ActivityCreateFailed             = "failed to create activity"
+	ActivityNotFound                 = "activity not found"
+	ActivityFetchSuccess             = "activity data fetched"
+	PhotoFileRequired                = "photo file is required"
+	PhotoMetadataSaveFailed          = "failed to save photo metadata"
+	FileUploadFailed                 = "failed to upload file"
+	FileUploadSuccess                = "file uploaded"
 
-	// AUTH
-	LOGIN_SUCCESS = "successfully login"
-	UNAUTHORIZED = "unauthorized"
-	MISSING_ID_TOKEN = "missing ID token"
+	// Auth
+	LoginSuccess   = "logged in"
+	Unauthorized   = "unauthorized access"
+	MissingIDToken = "missing ID token"
 
-	// LIKE
-	CREATE_LIKE_SUCCESS = "successfully create like"
-	LIKE_ALREADY_EXISTS = "like already exists"
-	LIKE_NOT_FOUND = "like not found"
-	LIKE_DELETED = "like deleted"
+	// Like
+	LikeCreateSuccess = "like created"
+	LikeAlreadyExists = "like already exists"
+	LikeNotFound      = "like not found"
+	LikeDeleted       = "like deleted"
 
-	// COMMENT
-	CREATE_COMMENT_SUCCESS = "successfully create comment"
-	CREATE_COMMENT_FAILED = "failed to create comment"
-	DELETE_COMMENT_SUCCESS = "comment deleted"
-	DELETE_COMMENT_ACCESS_DENIED = "access denied: not allowed to delete this comment"
+	// Comment
+	CommentCreateSuccess            = "comment created"
+	CommentCreateFailed             = "failed to create comment"
+	CommentDeleteSuccess            = "comment deleted"
+	CommentDeleteAccessDenied       = "access denied: you are not allowed to delete this comment"
+	CommentCreateSuccessWithWarning = "comment created, but failed to fetch full data"
 
-	INVALID_TYPE_USER_ID = "invalid type: userID"
-	INVALID_TYPE_ACTIVITY_ID = "invalid type: activityID"
-	INVALID_REQUEST = "invalid request"
+	// Validation / Error
+	InvalidRequestFormat = "invalid request format"
 )

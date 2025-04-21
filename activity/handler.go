@@ -25,7 +25,7 @@ func NewHandler(service Service) *Handler {
 func (h *Handler) UploadActivityPhoto(c *gin.Context) {
 	file, err := c.FormFile("photo")
 	if err != nil {
-		response.SendError(c, http.StatusBadRequest, constants.PHOTO_FILE_REQUIRED)
+		response.SendError(c, http.StatusBadRequest, constants.PhotoFileRequired)
 		return
 	}
 
@@ -33,18 +33,18 @@ func (h *Handler) UploadActivityPhoto(c *gin.Context) {
 	savePath := "./uploads/" + filename
 
 	if err := c.SaveUploadedFile(file, savePath); err != nil {
-		response.SendError(c, http.StatusInternalServerError, constants.UPLOAD_FILE_FAILED)
+		response.SendError(c, http.StatusInternalServerError, constants.FileUploadFailed)
 		return
 	}
 
 	fileURL := fmt.Sprintf("http://localhost:8080/uploads/%s", filename)
-	response.SendSuccess(c, http.StatusOK, constants.UPLOAD_FILE_SUCCESS, fileURL)
+	response.SendSuccess(c, http.StatusOK, constants.FileUploadSuccess, fileURL)
 }
 
 func (h *Handler) PostActivity(c *gin.Context) {
 	var req CreateActivityRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.SendError(c, http.StatusBadRequest, constants.INVALID_REQUEST)
+		response.SendError(c, http.StatusBadRequest, constants.InvalidRequestFormat)
 		return
 	}
 
@@ -73,7 +73,7 @@ func (h *Handler) PostActivity(c *gin.Context) {
 
 	// Save activity
 	if err := h.service.CreateActivity(&activity); err != nil {
-		response.SendError(c, http.StatusInternalServerError, constants.CREATE_ACTIVITY_FAILED)
+		response.SendError(c, http.StatusInternalServerError, constants.ActivityCreateFailed)
 		return
 	}
 
@@ -86,26 +86,26 @@ func (h *Handler) PostActivity(c *gin.Context) {
 		if err := h.service.CreatePicture(&pic); err != nil {
 			// Rollback: delete the activity, and all associated pictures will be automatically deleted as well
 			_ = h.service.DeleteActivityByID(activity.ID)
-			response.SendError(c, http.StatusInternalServerError, constants.CREATE_ACTIVITY_FAILED)
+			response.SendError(c, http.StatusInternalServerError, constants.ActivityCreateFailed)
 			return
 		}
 	}
 
 	newActivity, err := h.service.GetByID(&activity.ID)
 	if err != nil {
-		response.SendSuccessWithWarning(c, constants.CREATE_ACTIVITY_SUCCESS_WITH_WARNING)
+		response.SendSuccessWithWarning(c, constants.ActivityCreateSuccessWithWarning)
 		return
 	}
 	newActivityResponse := GenerateActivityResponse(newActivity)
 
 	pictureUrls, err := h.service.GetPictureUrlsByActivityID(&activity.ID)
 	if err != nil {
-		response.SendSuccessWithWarning(c, constants.CREATE_ACTIVITY_SUCCESS_WITH_WARNING)
+		response.SendSuccessWithWarning(c, constants.ActivityCreateSuccessWithWarning)
 		return
 	}
 	newActivityResponse.PictureURLs = *pictureUrls
 
-	response.SendSuccess(c, http.StatusCreated, constants.CREATE_ACTIVITY_SUCCESS, newActivityResponse)
+	response.SendSuccess(c, http.StatusCreated, constants.ActivityCreateSuccess, newActivityResponse)
 }
 
 func (h *Handler) GetActivityByID(c *gin.Context) {
@@ -113,7 +113,7 @@ func (h *Handler) GetActivityByID(c *gin.Context) {
 
 	id, err := strconv.ParseUint(idParam, 10, 64)
 	if err != nil {
-		response.SendError(c, http.StatusBadRequest, constants.INVALID_TYPE_ACTIVITY_ID)
+		response.SendError(c, http.StatusBadRequest, constants.InvalidRequestFormat)
 		return
 	}
 
@@ -122,7 +122,7 @@ func (h *Handler) GetActivityByID(c *gin.Context) {
 	activity, err := h.service.GetByID(&activityID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			response.SendError(c, http.StatusNotFound, constants.ACTIVITY_NOT_FOUND)
+			response.SendError(c, http.StatusNotFound, constants.ActivityNotFound)
 			return
 		} else {
 			response.SendError(c, http.StatusInternalServerError, err.Error())
@@ -137,7 +137,7 @@ func (h *Handler) GetActivityByID(c *gin.Context) {
 	}
 	activityResponse.PictureURLs = *pictureUrls
 
-	response.SendSuccess(c, http.StatusOK, constants.ACTIVITY_FOUND_SUCCESS, activityResponse)
+	response.SendSuccess(c, http.StatusOK, constants.ActivityFetchSuccess, activityResponse)
 }
 
 func (h *Handler) GetAllActivities(c *gin.Context) {
@@ -151,7 +151,7 @@ func (h *Handler) GetAllActivities(c *gin.Context) {
 
 	activities, err := h.service.GetAll(userID)
 	if err != nil {
-		response.SendError(c, http.StatusInternalServerError, constants.ACTIVITY_NOT_FOUND)
+		response.SendError(c, http.StatusInternalServerError, constants.ActivityNotFound)
 		return
 	}
 
@@ -168,7 +168,7 @@ func (h *Handler) GetAllActivities(c *gin.Context) {
 		activitiesResponse = append(activitiesResponse, activityResponse)
 	}
 
-	response.SendSuccess(c, http.StatusOK, constants.ACTIVITY_FOUND_SUCCESS, activitiesResponse)
+	response.SendSuccess(c, http.StatusOK, constants.ActivityFetchSuccess, activitiesResponse)
 }
 
 func (h *Handler) CreateLike(c *gin.Context) {
@@ -196,7 +196,7 @@ func (h *Handler) CreateLike(c *gin.Context) {
 	}
 
 	if isLikeExists {
-		response.SendError(c, http.StatusBadRequest, constants.LIKE_ALREADY_EXISTS)
+		response.SendError(c, http.StatusBadRequest, constants.LikeAlreadyExists)
 		return
 	}
 
@@ -206,7 +206,7 @@ func (h *Handler) CreateLike(c *gin.Context) {
 		return
 	}
 
-	response.SendSuccess(c, http.StatusCreated, constants.CREATE_LIKE_SUCCESS, nil)
+	response.SendSuccess(c, http.StatusCreated, constants.LikeCreateSuccess, nil)
 }
 
 func (h *Handler) DeleteLike(c *gin.Context) {
@@ -223,7 +223,7 @@ func (h *Handler) DeleteLike(c *gin.Context) {
 
 	like := &Like{
 		ActivityID: req.ActivityID,
-		UserID: userID,
+		UserID:     userID,
 	}
 
 	isLikeExists, err := h.service.IsLikeExists(like)
@@ -233,7 +233,7 @@ func (h *Handler) DeleteLike(c *gin.Context) {
 	}
 
 	if !isLikeExists {
-		response.SendError(c, http.StatusBadRequest, constants.LIKE_NOT_FOUND)
+		response.SendError(c, http.StatusBadRequest, constants.LikeNotFound)
 		return
 	}
 
@@ -243,7 +243,7 @@ func (h *Handler) DeleteLike(c *gin.Context) {
 		return
 	}
 
-	response.SendSuccess(c, http.StatusOK, constants.LIKE_DELETED, nil)
+	response.SendSuccess(c, http.StatusOK, constants.LikeDeleted, nil)
 }
 
 func (h *Handler) CreateComment(c *gin.Context) {
@@ -258,10 +258,10 @@ func (h *Handler) CreateComment(c *gin.Context) {
 		return
 	}
 
-	comment := &Comment {
+	comment := &Comment{
 		ActivityID: req.ActivityID,
-		Text: req.Text,
-		UserID: userID,
+		Text:       req.Text,
+		UserID:     userID,
 	}
 
 	responseData, err := h.service.CreateComment(comment)
@@ -270,7 +270,7 @@ func (h *Handler) CreateComment(c *gin.Context) {
 		return
 	}
 
-	response.SendSuccess(c, http.StatusCreated, constants.CREATE_COMMENT_SUCCESS, responseData)
+	response.SendSuccess(c, http.StatusCreated, constants.CommentCreateSuccess, responseData)
 }
 
 func (h *Handler) DeleteComment(c *gin.Context) {
@@ -290,5 +290,5 @@ func (h *Handler) DeleteComment(c *gin.Context) {
 		response.SendError(c, statusCode, err.Error())
 		return
 	}
-	response.SendSuccess(c, statusCode, constants.DELETE_COMMENT_SUCCESS, nil)
+	response.SendSuccess(c, statusCode, constants.CommentDeleteSuccess, nil)
 }

@@ -22,11 +22,11 @@ func SendResponse(c *gin.Context, statusCode int, status string, message string,
 }
 
 func SendSuccess(c *gin.Context, code int, message string, data interface{}) {
-	SendResponse(c, http.StatusOK, constants.STATUS_SUCCESS, message, data)
+	SendResponse(c, http.StatusOK, constants.StatusSuccess, message, data)
 }
 
 func SendError(c *gin.Context, code int, message string) {
-	SendResponse(c, code, constants.STATUS_FAILED, message, nil)
+	SendResponse(c, code, constants.StatusFailed, message, nil)
 }
 
 func SendSuccessWithWarning(c *gin.Context, message string) {

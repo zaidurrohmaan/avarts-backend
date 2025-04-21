@@ -11,13 +11,13 @@ import (
 func GetUserIDFromJWT(c *gin.Context) (uint, bool) {
 	idInterface, exists := c.Get("id")
 	if !exists {
-		response.SendError(c, http.StatusUnauthorized, constants.UNAUTHORIZED)
+		response.SendError(c, http.StatusUnauthorized, constants.Unauthorized)
 		return 0, true
 	}
 
 	userId, ok := idInterface.(uint)
 	if !ok {
-		response.SendError(c, http.StatusInternalServerError, constants.INVALID_TYPE_USER_ID)
+		response.SendError(c, http.StatusInternalServerError, constants.InvalidRequestFormat)
 		return 0, true
 	}
 

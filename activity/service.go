@@ -109,5 +109,5 @@ func (s *service) DeleteComment(userID, commentID uint) (int, error) {
 		return http.StatusOK, nil
 	}
 
-	return http.StatusForbidden, errors.New(constants.DELETE_COMMENT_ACCESS_DENIED)
+	return http.StatusForbidden, errors.New(constants.CommentDeleteAccessDenied)
 }

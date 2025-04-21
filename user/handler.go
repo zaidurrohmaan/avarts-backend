@@ -25,7 +25,7 @@ func (h *Handler) Profile(c *gin.Context) {
 	user, err := h.service.GetProfile(username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			response.SendError(c, http.StatusNotFound, constants.USER_NOT_FOUND)
+			response.SendError(c, http.StatusNotFound, constants.UserNotFound)
 		} else {
 			response.SendError(c, http.StatusInternalServerError, err.Error())
 		}
@@ -34,7 +34,7 @@ func (h *Handler) Profile(c *gin.Context) {
 
 	userResponse := GenerateUserResponse(user)
 
-	response.SendSuccess(c, http.StatusOK, constants.USER_FOUND_SUCCESS, userResponse)
+	response.SendSuccess(c, http.StatusOK, constants.UserFetchSuccess, userResponse)
 }
 
 func (h *Handler) MyProfile(c *gin.Context) {
@@ -50,7 +50,7 @@ func (h *Handler) MyProfile(c *gin.Context) {
 	}
 	userResponse := GenerateUserResponse(user)
 
-	response.SendSuccess(c, http.StatusOK, constants.USER_FOUND_SUCCESS, userResponse)
+	response.SendSuccess(c, http.StatusOK, constants.UserFetchSuccess, userResponse)
 }
 
 func (h *Handler) UpdateProfile(c *gin.Context) {
@@ -72,5 +72,5 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 	}
 	userResponse := GenerateUserResponse(user)
 
-	response.SendSuccess(c, http.StatusOK, constants.USER_UPDATE_SUCCESS, userResponse)
+	response.SendSuccess(c, http.StatusOK, constants.UserUpdateSuccess, userResponse)
 }

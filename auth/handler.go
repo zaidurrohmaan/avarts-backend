@@ -20,7 +20,7 @@ func (h *Handler) GoogleLogin(c *gin.Context) {
 	var body GoogleLoginRequest
 
 	if err := c.ShouldBindJSON(&body); err != nil || body.IdToken == "" {
-		response.SendError(c, http.StatusBadRequest, constants.MISSING_ID_TOKEN)
+		response.SendError(c, http.StatusBadRequest, constants.MissingIDToken)
 		return
 	}
 
@@ -30,5 +30,5 @@ func (h *Handler) GoogleLogin(c *gin.Context) {
 		return
 	}
 
-	response.SendSuccess(c, http.StatusOK, constants.LOGIN_SUCCESS, token)
+	response.SendSuccess(c, http.StatusOK, constants.LoginSuccess, token)
 }
