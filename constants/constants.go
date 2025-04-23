@@ -22,6 +22,8 @@ const (
 	FileUploadFailed                 = "failed to upload file"
 	FileUploadSuccess                = "file uploaded"
 	OpenFileFailed                   = "failed to open file"
+	ReadFileFailed                   = "failed to read file"
+	InvalidImage                     = "file is not a valid image. allowed extensions: .jpg, .jpeg, .png"
 
 	// Auth
 	LoginSuccess   = "logged in"

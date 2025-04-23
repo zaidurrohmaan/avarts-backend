@@ -5,7 +5,6 @@ import (
 	"avarts/response"
 	"avarts/utils"
 	"errors"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -36,8 +35,7 @@ func (h *Handler) UploadAvatar(c *gin.Context) {
 
 	url, err := utils.UploadToS3(file, fileHeader, "avatar")
 	if err != nil {
-		log.Println("UploadToS3 error:", err) // Tambahkan log ini
-		response.Failed(c, http.StatusInternalServerError, constants.FileUploadFailed)
+		response.Failed(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -98,31 +96,3 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 
 	response.Success(c, http.StatusOK, constants.UserUpdateSuccess, nil)
 }
-
-// func (h *Handler) UploadAvatar(c *gin.Context) {
-// 	file, fileHeader, err := c.Request.FormFile("avatar")
-// 	if err != nil {
-// 		response.Failed(c, http.StatusBadRequest, constants.PhotoFileRequired)
-// 		return
-// 	}
-
-// 	url, err := utils.UploadToS3(file, fileHeader, "avatars")
-// 	if err != nil {
-// 		response.Failed(c, http.StatusInternalServerError, constants.FileUploadFailed)
-// 		return
-// 	}
-
-// 	userID, isError := utils.GetUserIDFromJWT(c)
-// 	if isError {
-// 		return
-// 	}
-
-// 	updatedUser := &User {
-// 		AvatarUrl: url,
-// 	}
-
-// 	if err := h.service.UpdateProfile(userID, updatedUser); err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save avatar URL"})
-// 		return
-// 	}
-// }
