@@ -1,10 +1,10 @@
 package utils
 
 import (
+	"avarts/config"
 	"avarts/constants"
 	"avarts/response"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,12 +19,12 @@ func GenerateJWT(username string, userID uint) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	return token.SignedString([]byte(config.JWTSecret))
 }
 
 func ParseJWT(tokenStr string) (uint, string, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("JWT_SECRET")), nil
+		return []byte(config.JWTSecret), nil
 	})
 	if err != nil {
 		return 0, "", err

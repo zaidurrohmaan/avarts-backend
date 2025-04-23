@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	config.LoadEnv()
 	config.InitDB()
 	config.InitAWS()
 

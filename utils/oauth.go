@@ -1,23 +1,23 @@
 package utils
 
 import (
+	"avarts/config"
 	"context"
 	"errors"
-	"os"
 
 	"google.golang.org/api/idtoken"
 )
 
 type GoogleUserInfo struct {
-	Email     string
-	Name      string
-	Picture   string
-	GoogleID  string
-	Audience  string
+	Email    string
+	Name     string
+	Picture  string
+	GoogleID string
+	Audience string
 }
 
 func VerifyGoogleToken(idToken string) (*GoogleUserInfo, error) {
-	payload, err := idtoken.Validate(context.Background(), idToken, os.Getenv("GOOGLE_CLIENT_ID"))
+	payload, err := idtoken.Validate(context.Background(), idToken, config.GoogleClientID)
 	if err != nil {
 		return nil, err
 	}

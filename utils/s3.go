@@ -1,10 +1,10 @@
 package utils
 
 import (
+	"avarts/config"
 	"fmt"
 	"log"
 	"mime/multipart"
-	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -13,14 +13,9 @@ import (
 )
 
 func UploadToS3(file multipart.File, fileHeader *multipart.FileHeader, folder string) (string, error) {
-	awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY")
-	awsSecretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-	awsRegion := os.Getenv("AWS_REGION")
-	awsBucketName := os.Getenv("AWS_BUCKET_NAME")
-
 	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(awsRegion),
-		Credentials: credentials.NewStaticCredentials(awsAccessKeyID, awsSecretAccessKey, ""),
+		Region:      aws.String(config.AWSRegion),
+		Credentials: credentials.NewStaticCredentials(config.AWSAccessKey, config.AWSSecretAccessKey, ""),
 	})
 	if err != nil {
 		log.Fatal("Failed to create session", err)
@@ -32,7 +27,7 @@ func UploadToS3(file multipart.File, fileHeader *multipart.FileHeader, folder st
 	fileKey := fmt.Sprintf("%s/%s", folder, fileHeader.Filename)
 
 	_, err = s3Svc.PutObject(&s3.PutObjectInput{
-		Bucket: aws.String(awsBucketName),
+		Bucket: aws.String(config.AWSBucketName),
 		Key:    aws.String(fileKey),
 		Body:   file,
 		ContentType: aws.String(fileHeader.Header.Get("Content-Type")),
@@ -41,6 +36,6 @@ func UploadToS3(file multipart.File, fileHeader *multipart.FileHeader, folder st
 		return "", fmt.Errorf("failed to upload file to S3: %v", err)
 	}
 
-	url := fmt.Sprintf("https://%s.s3.amazonaws.com/%s", awsBucketName, fileKey)
+	url := fmt.Sprintf("https://%s.s3.amazonaws.com/%s", config.AWSBucketName, fileKey)
 	return url, nil
 }
