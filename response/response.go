@@ -22,7 +22,7 @@ func SendResponse(c *gin.Context, statusCode int, status string, message string,
 }
 
 func Success(c *gin.Context, code int, message string, data interface{}) {
-	SendResponse(c, http.StatusOK, constants.StatusSuccess, message, data)
+	SendResponse(c, code, constants.StatusSuccess, message, data)
 }
 
 func Failed(c *gin.Context, code int, message string) {
