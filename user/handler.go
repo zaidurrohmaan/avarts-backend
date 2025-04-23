@@ -33,13 +33,13 @@ func (h *Handler) UploadAvatar(c *gin.Context) {
 	}
 	defer file.Close()
 
-	url, err := utils.UploadToS3(file, fileHeader, "avatar")
+	url, statusCode, err := h.service.UploadAvatarToS3(&file, fileHeader)
 	if err != nil {
-		response.Failed(c, http.StatusInternalServerError, err.Error())
+		response.Failed(c, statusCode, err.Error())
 		return
 	}
 
-	response.Success(c, http.StatusCreated, constants.FileUploadSuccess, gin.H{"photo_url": url})
+	response.Success(c, statusCode, constants.FileUploadSuccess, gin.H{"photo_url": url})
 }
 
 func (h *Handler) Profile(c *gin.Context) {

@@ -21,10 +21,6 @@ import (
 )
 
 func UploadToS3(file multipart.File, fileHeader *multipart.FileHeader, folder string) (string, error) {
-	if err := isValidImage(&file, fileHeader); err != nil {
-		return "", err
-	}
-
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String(config.AWSRegion),
 		Credentials: credentials.NewStaticCredentials(config.AWSAccessKey, config.AWSSecretAccessKey, ""),
@@ -53,7 +49,11 @@ func UploadToS3(file multipart.File, fileHeader *multipart.FileHeader, folder st
 	return url, nil
 }
 
-func isValidImage(file *multipart.File, fileHeader *multipart.FileHeader) error {
+func IsValidImage(file *multipart.File, fileHeader *multipart.FileHeader, maxSize int64) error {
+	if fileHeader.Size > maxSize {
+		return fmt.Errorf("%s: %d MB", constants.FileSizeExceeded, maxSize / (1024 * 1024))
+	}
+
 	ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
 	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" {
 		return fmt.Errorf(constants.InvalidImage)

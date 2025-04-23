@@ -18,25 +18,6 @@ func NewHandler(service Service) *Handler {
 	return &Handler{service}
 }
 
-// func (h *Handler) UploadActivityPhoto(c *gin.Context) {
-// 	file, err := c.FormFile("photo")
-// 	if err != nil {
-// 		response.Failed(c, http.StatusBadRequest, constants.PhotoFileRequired)
-// 		return
-// 	}
-
-// 	filename := fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename)
-// 	savePath := "./uploads/" + filename
-
-// 	if err := c.SaveUploadedFile(file, savePath); err != nil {
-// 		response.Failed(c, http.StatusInternalServerError, constants.FileUploadFailed)
-// 		return
-// 	}
-
-// 	fileURL := fmt.Sprintf("http://localhost:8080/uploads/%s", filename)
-// 	response.Success(c, http.StatusOK, constants.FileUploadSuccess, fileURL)
-// }
-
 func (h *Handler) UploadActivityPhoto(c *gin.Context) {
 	fileHeader, err := c.FormFile("photo")
 	if err != nil {
@@ -51,7 +32,7 @@ func (h *Handler) UploadActivityPhoto(c *gin.Context) {
 	}
 	defer file.Close()
 
-	url, err := utils.UploadToS3(file, fileHeader, "activity")
+	url, err := h.service.UploadActivityPhotoToS3(&file, fileHeader)
 	if err != nil {
 		response.Failed(c, http.StatusInternalServerError, constants.FileUploadFailed)
 		return

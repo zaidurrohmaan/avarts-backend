@@ -24,6 +24,7 @@ const (
 	OpenFileFailed                   = "failed to open file"
 	ReadFileFailed                   = "failed to read file"
 	InvalidImage                     = "file is not a valid image. allowed extensions: .jpg, .jpeg, .png"
+	FileSizeExceeded                 = "file size exceeds the maximum size"
 
 	// Auth
 	LoginSuccess   = "logged in"

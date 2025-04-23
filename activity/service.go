@@ -2,7 +2,9 @@ package activity
 
 import (
 	"avarts/constants"
+	"avarts/utils"
 	"errors"
+	"mime/multipart"
 	"net/http"
 	"time"
 
@@ -14,6 +16,7 @@ type Service interface {
 	CreateActivity(userID uint, activity *CreateActivityRequest) (*uint, int, error)
 	GetByID(activityID *uint) (*ActivityResponse, int, error)
 	GetAll(userID *uint) (*[]ActivityResponse, int, error)
+	UploadActivityPhotoToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, error)
 
 	// Like
 	CreateLike(userID uint, like *LikeRequest) (int, error)
@@ -202,4 +205,18 @@ func (s *service) DeleteComment(userID, commentID uint) (int, error) {
 	}
 
 	return http.StatusForbidden, errors.New(constants.CommentDeleteAccessDenied)
+}
+
+func (s *service) UploadActivityPhotoToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, error) {
+	maxSize_5MB := int64(5 * 1024 * 1024)
+	if err := utils.IsValidImage(file, fileHeader, maxSize_5MB); err != nil {
+		return nil, err
+	}
+
+	avatarUrl, err := utils.UploadToS3(*file, fileHeader, "activity")
+	if err != nil {
+		return nil, err
+	}
+
+	return &avatarUrl, nil
 }
