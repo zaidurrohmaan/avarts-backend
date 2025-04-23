@@ -41,3 +41,11 @@ func ActivityRoutes(r *gin.RouterGroup, activityHandler *activity.Handler) {
 		protected.POST("/photos", activityHandler.UploadActivityPhoto)
 	}
 }
+
+func UploadRoutes(r *gin.RouterGroup, userHandler *user.Handler, activityHandler *activity.Handler) {
+	protected := r.Group("/upload", middlewares.AuthMiddleware())
+	{
+		protected.POST("/avatar", userHandler.UploadAvatar)
+		protected.POST("/activity", activityHandler.UploadActivityPhoto)
+	}
+}

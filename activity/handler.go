@@ -4,10 +4,8 @@ import (
 	"avarts/constants"
 	"avarts/response"
 	"avarts/utils"
-	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,23 +18,46 @@ func NewHandler(service Service) *Handler {
 	return &Handler{service}
 }
 
+// func (h *Handler) UploadActivityPhoto(c *gin.Context) {
+// 	file, err := c.FormFile("photo")
+// 	if err != nil {
+// 		response.Failed(c, http.StatusBadRequest, constants.PhotoFileRequired)
+// 		return
+// 	}
+
+// 	filename := fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename)
+// 	savePath := "./uploads/" + filename
+
+// 	if err := c.SaveUploadedFile(file, savePath); err != nil {
+// 		response.Failed(c, http.StatusInternalServerError, constants.FileUploadFailed)
+// 		return
+// 	}
+
+// 	fileURL := fmt.Sprintf("http://localhost:8080/uploads/%s", filename)
+// 	response.Success(c, http.StatusOK, constants.FileUploadSuccess, fileURL)
+// }
+
 func (h *Handler) UploadActivityPhoto(c *gin.Context) {
-	file, err := c.FormFile("photo")
+	fileHeader, err := c.FormFile("photo")
 	if err != nil {
 		response.Failed(c, http.StatusBadRequest, constants.PhotoFileRequired)
 		return
 	}
 
-	filename := fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename)
-	savePath := "./uploads/" + filename
+	file, err := fileHeader.Open()
+	if err != nil {
+		response.Failed(c, http.StatusInternalServerError, constants.OpenFileFailed)
+		return
+	}
+	defer file.Close()
 
-	if err := c.SaveUploadedFile(file, savePath); err != nil {
+	url, err := utils.UploadToS3(file, fileHeader, "activity")
+	if err != nil {
 		response.Failed(c, http.StatusInternalServerError, constants.FileUploadFailed)
 		return
 	}
 
-	fileURL := fmt.Sprintf("http://localhost:8080/uploads/%s", filename)
-	response.Success(c, http.StatusOK, constants.FileUploadSuccess, fileURL)
+	response.Success(c, http.StatusCreated, constants.FileUploadSuccess, gin.H{"photo_url": url})
 }
 
 func (h *Handler) PostActivity(c *gin.Context) {

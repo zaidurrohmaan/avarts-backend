@@ -1,13 +1,16 @@
 package user
 
 import (
-	"fmt"
+	"avarts/constants"
+	"errors"
+
+	"gorm.io/gorm"
 )
 
 type Service interface {
 	GetByUsername(username string) (*User, error)
 	GetByID(userID uint) (*User, error)
-	UpdateProfile(userID uint, updated *User) (*User, error)
+	UpdateProfile(userID uint, updated UpdateProfileRequest) error
 }
 
 type service struct {
@@ -26,29 +29,38 @@ func (s *service) GetByID(userID uint) (*User, error) {
 	return s.repository.Get(userID)
 }
 
-func (s *service) UpdateProfile(userID uint, updated *User) (*User, error) {
+func (s *service) UpdateProfile(userID uint, updated UpdateProfileRequest) error {
 	user, err := s.repository.Get(userID)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New(constants.UserNotFound)
+		}
+		return err
 	}
 
-	newUsername := updated.Username
+	if updated.Username != nil {
+		newUsername := updated.Username
 
-	if user.Username != newUsername {
-		taken, err := s.repository.IsUsernameTaken(newUsername)
-		if err != nil {
-			return nil, err
-		}
-		if !taken {
-			user.Username = newUsername
-		} else {
-			return nil, fmt.Errorf("username already taken")
+		if user.Username != *newUsername {
+			taken, err := s.repository.IsUsernameTaken(*newUsername)
+			if err != nil {
+				return err
+			}
+			if !taken {
+				user.Username = *newUsername
+			} else {
+				return errors.New(constants.UsernameIsTaken)
+			}
 		}
 	}
 
-	user.Name = updated.Name
-	user.AvatarUrl = updated.AvatarUrl
+	if updated.Name != nil {
+		user.Name = *updated.Name
+	}
 
-	err = s.repository.Update(user)
-	return user, err
+	if updated.AvatarURL != nil {
+		user.AvatarUrl = *updated.AvatarURL
+	}
+
+	return s.repository.Update(user)
 }

@@ -25,6 +25,12 @@ type UserResponse struct {
 	AvatarUrl string    `json:"avatar_url"`
 }
 
+type UpdateProfileRequest struct {
+	Username  *string `json:"username,omitempty"`
+	Name      *string `json:"name,omitempty"`
+	AvatarURL *string `json:"avatar_url,omitempty"`
+}
+
 func GenerateUserResponse(userData *User) (UserResponse) {
 	userResponse := UserResponse {
 		ID: userData.ID,

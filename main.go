@@ -13,6 +13,7 @@ import (
 func main() {
 	config.LoadEnv()
 	config.InitDB()
+	config.InitAWS()
 
 	user.MigrateUser(config.DB)
 	activity.MigrateActivity(config.DB)
@@ -34,6 +35,7 @@ func main() {
 	routes.AuthRoutes(api, authHandler)
 	routes.UserRoutes(api, userHandler)
 	routes.ActivityRoutes(api, activityHandler)
+	routes.UploadRoutes(api, userHandler, activityHandler)
 
 	r.Run(":8080")
 }

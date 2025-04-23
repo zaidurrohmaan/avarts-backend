@@ -9,6 +9,7 @@ const (
 	UserFetchSuccess  = "user data fetched"
 	UserNotFound      = "user not found"
 	UserUpdateSuccess = "user data updated"
+	UsernameIsTaken   = "username already taken"
 
 	// Activity & Photo
 	ActivityCreateSuccess            = "activity created"
@@ -20,6 +21,7 @@ const (
 	PhotoMetadataSaveFailed          = "failed to save photo metadata"
 	FileUploadFailed                 = "failed to upload file"
 	FileUploadSuccess                = "file uploaded"
+	OpenFileFailed                   = "failed to open file"
 
 	// Auth
 	LoginSuccess   = "logged in"
