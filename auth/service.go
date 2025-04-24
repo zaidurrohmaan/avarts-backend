@@ -57,12 +57,12 @@ func (s *service) LoginWithGoogle(idToken string) (*LoginResponse, error) {
 				GoogleID:  googleUserInfo.GoogleID,
 			}
 
-			token, err := utils.GenerateJWT(user.Username, user.ID)
+			err = s.repository.Create(user)
 			if err != nil {
 				return nil, err
 			}
 
-			err = s.repository.Create(user)
+			token, err := utils.GenerateJWT(user.Username, user.ID)
 			if err != nil {
 				return nil, err
 			}
