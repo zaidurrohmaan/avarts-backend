@@ -13,6 +13,7 @@ import (
 type Service interface {
 	GetByUsername(username string) (*User, error)
 	GetByID(userID uint) (*User, error)
+	DeleteUser(userID uint, request DeleteUserRequest) (int, error)
 	UpdateProfile(userID uint, updated UpdateProfileRequest) (int, error)
 	UploadAvatarToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, int, error)
 }
@@ -31,6 +32,20 @@ func (s *service) GetByUsername(username string) (*User, error) {
 
 func (s *service) GetByID(userID uint) (*User, error) {
 	return s.repository.GetUser(userID)
+}
+
+func (s *service) DeleteUser(userID uint, request DeleteUserRequest) (int, error) {
+	if userID != request.UserID {
+		return http.StatusForbidden, errors.New(constants.UserDeleteAccesDenied)
+	}
+
+	if err := s.repository.DeleteUser(request.UserID); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return http.StatusNotFound, errors.New(constants.UserNotFound)
+		}
+		return http.StatusInternalServerError, err
+	}
+	return http.StatusOK, nil
 }
 
 func (s *service) UpdateProfile(userID uint, updated UpdateProfileRequest) (int, error) {

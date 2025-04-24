@@ -10,6 +10,8 @@ const (
 	UserNotFound      = "user not found"
 	UserUpdateSuccess = "user data updated"
 	UsernameIsTaken   = "username already taken"
+	UserDeleteSuccess = "user deleted"
+	UserDeleteAccesDenied = "access denied: you are not allowed to delete this user"
 
 	// Activity & Photo
 	ActivityCreateSuccess            = "activity created"

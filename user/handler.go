@@ -96,3 +96,23 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 
 	response.Success(c, statusCode, constants.UserUpdateSuccess, nil)
 }
+
+func (h *Handler) DeleteActivity(c *gin.Context) {
+	var req DeleteUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Failed(c, http.StatusBadRequest, constants.InvalidRequestFormat)
+		return
+	}
+
+	userID, isError := utils.GetUserIDFromJWT(c)
+	if isError {
+		return
+	}
+
+	statusCode, err := h.service.DeleteUser(userID, req)
+	if err != nil {
+		response.Failed(c, statusCode, err.Error())
+		return
+	}
+	response.Success(c, statusCode, constants.UserDeleteSuccess, nil)
+}

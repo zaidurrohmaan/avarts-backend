@@ -12,6 +12,7 @@ type Repository interface {
 	GetUserByGoogleId(googleId string) (*User, error)
 	CreateUser(user *User) error
 	UpdateUser(user *User) error
+	DeleteUser(userID uint) error
 	IsUsernameTaken(username string) (bool, error)
 }
 
@@ -51,6 +52,14 @@ func (r *repository) CreateUser(user *User) error {
 
 func (r *repository) UpdateUser(user *User) error {
 	return r.db.Save(user).Error
+}
+
+func (r *repository) DeleteUser(userID uint) error {
+	result := r.db.Delete(&User{}, userID)
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }
 
 func (r *repository) IsUsernameTaken(username string) (bool, error) {

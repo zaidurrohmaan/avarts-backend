@@ -19,6 +19,7 @@ func UserRoutes(r *gin.RouterGroup, userHandler *user.Handler) {
 		protected.GET("/:username", userHandler.Profile)
 		protected.GET("/me", userHandler.MyProfile)
 		protected.PATCH("/update", userHandler.UpdateProfile)
+		protected.DELETE("", userHandler.DeleteActivity)
 	}
 }
 
