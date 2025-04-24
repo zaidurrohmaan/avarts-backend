@@ -1,7 +1,6 @@
 package activity
 
 import (
-	"avarts/config"
 	"avarts/constants"
 	"avarts/utils"
 	"errors"
@@ -242,7 +241,7 @@ func (s *service) DeleteActivity(userID uint, activityID *uint) (int, error) {
 
 	pictureUrls := activity.PictureURLs
 	for _, url := range pictureUrls {
-		key := strings.ReplaceAll(url, "https://avarts-storage.s3.amazonaws.com/", "")
+		key := strings.ReplaceAll(url, constants.AwsS3PrefixUrl, "")
 		if err := s.DeleteActivityPhotoFromS3(key); err != nil {
 			log.Println(constants.DeleteS3PhotoFailed)
 		}
@@ -262,5 +261,5 @@ func (s *service) DeleteActivity(userID uint, activityID *uint) (int, error) {
 }
 
 func (s *service) DeleteActivityPhotoFromS3(key string) error {
-	return utils.DeleteS3File(config.AWSBucketName, key)
+	return utils.DeleteS3File(key)
 }

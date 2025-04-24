@@ -76,7 +76,7 @@ func IsValidImage(file *multipart.File, fileHeader *multipart.FileHeader, maxSiz
 	return nil
 }
 
-func DeleteS3File(bucketName, key string) error {
+func DeleteS3File(key string) error {
 	ctx := context.TODO()
 
 	cfg, err := awsConfig.LoadDefaultConfig(ctx)
@@ -87,7 +87,7 @@ func DeleteS3File(bucketName, key string) error {
 	s3Client := s3v2.NewFromConfig(cfg)
 
 	_, err = s3Client.DeleteObject(ctx, &s3v2.DeleteObjectInput{
-		Bucket: aws.String(bucketName),
+		Bucket: aws.String(config.AWSBucketName),
 		Key:    aws.String(key),
 	})
 

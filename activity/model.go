@@ -26,9 +26,10 @@ type Activity struct {
 }
 
 type Picture struct {
-	ID         uint   `gorm:"primaryKey;autoIncrement" json:"id"`
-	ActivityID uint   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"activity_id"`
-	URL        string `gorm:"type:varchar(255)" json:"url"`
+	ID         uint     `gorm:"primaryKey;autoIncrement" json:"id"`
+	ActivityID uint     `gorm:"not null" json:"activity_id"`
+	URL        string   `gorm:"type:varchar(255)" json:"url"`
+	Activity   Activity `gorm:"foreignKey:ActivityID;constraint:onDelete:CASCADE;" json:"-"`
 }
 
 type Like struct {
@@ -50,7 +51,7 @@ type Comment struct {
 }
 
 type CreateCommentRequest struct {
-	Text       string `json:"text"`
+	Text string `json:"text"`
 }
 
 type CreateCommentResponse struct {

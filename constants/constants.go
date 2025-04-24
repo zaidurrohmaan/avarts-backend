@@ -53,4 +53,7 @@ const (
 
 	// Validation / Error
 	InvalidRequestFormat = "invalid request format"
+
+	// AWS
+	AwsS3PrefixUrl = "https://avarts-storage.s3.amazonaws.com/"
 )

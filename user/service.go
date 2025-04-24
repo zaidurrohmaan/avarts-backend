@@ -6,6 +6,7 @@ import (
 	"errors"
 	"mime/multipart"
 	"net/http"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -35,6 +36,17 @@ func (s *service) GetUser(userID uint) (*User, error) {
 }
 
 func (s *service) DeleteUser(userID uint) (int, error) {
+	user, err := s.GetUser(userID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return http.StatusNotFound, errors.New(constants.UserNotFound)
+		}
+		return http.StatusInternalServerError, err
+	}
+
+	avatarUrl := user.AvatarUrl
+	key := strings.ReplaceAll(avatarUrl, constants.AwsS3PrefixUrl, "")
+	utils.DeleteS3File(key)
 	if err := s.repository.DeleteUser(userID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return http.StatusNotFound, errors.New(constants.UserNotFound)
@@ -57,7 +69,7 @@ func (s *service) UpdateUser(userID uint, updated UpdateProfileRequest) (int, er
 		newUsername := *updated.Username
 
 		if err = utils.ValidateUsername(newUsername); err != nil {
-			return http.StatusBadRequest,err
+			return http.StatusBadRequest, err
 		}
 
 		if user.Username != newUsername {
