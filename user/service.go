@@ -13,7 +13,7 @@ import (
 type Service interface {
 	GetUserByUsername(username string) (*User, error)
 	GetUser(userID uint) (*User, error)
-	DeleteUser(userID uint, request DeleteUserRequest) (int, error)
+	DeleteUser(userID uint) (int, error)
 	UpdateUser(userID uint, updated UpdateProfileRequest) (int, error)
 	UploadAvatarToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, int, error)
 }
@@ -34,12 +34,8 @@ func (s *service) GetUser(userID uint) (*User, error) {
 	return s.repository.GetUser(userID)
 }
 
-func (s *service) DeleteUser(userID uint, request DeleteUserRequest) (int, error) {
-	if userID != request.UserID {
-		return http.StatusForbidden, errors.New(constants.UserDeleteAccesDenied)
-	}
-
-	if err := s.repository.DeleteUser(request.UserID); err != nil {
+func (s *service) DeleteUser(userID uint) (int, error) {
+	if err := s.repository.DeleteUser(userID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return http.StatusNotFound, errors.New(constants.UserNotFound)
 		}

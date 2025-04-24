@@ -14,38 +14,38 @@ func AuthRoutes(r *gin.RouterGroup, authHandler *auth.Handler) {
 }
 
 func UserRoutes(r *gin.RouterGroup, userHandler *user.Handler) {
-	protected := r.Group("/profile", middlewares.AuthMiddleware())
+	users := r.Group("/users", middlewares.AuthMiddleware())
 	{
-		protected.GET("/:username", userHandler.GetUser)
-		protected.GET("/me", userHandler.MyProfile)
-		protected.PATCH("/update", userHandler.UpdateUser)
-		protected.DELETE("", userHandler.DeleteUser)
+		users.GET("/:username", userHandler.GetUser)
+		users.GET("/me", userHandler.GetMyProfile)
+		users.PATCH("/me", userHandler.UpdateUser)
+		users.DELETE("/me", userHandler.DeleteUser)
 	}
 }
 
 func ActivityRoutes(r *gin.RouterGroup, activityHandler *activity.Handler) {
-	protected := r.Group("/", middlewares.AuthMiddleware())
+	activities := r.Group("/activities", middlewares.AuthMiddleware())
 	{
-		activities := protected.Group("/activities")
+		// CRUD Activity
 		activities.POST("", activityHandler.CreateActivity)
-		activities.GET("/:id", activityHandler.GetActivity)
 		activities.GET("", activityHandler.GetAllActivities)
-		activities.DELETE("", activityHandler.DeleteActivity)
+		activities.GET("/:id", activityHandler.GetActivity)
+		activities.DELETE("/:id", activityHandler.DeleteActivity)
 
-		likes := protected.Group("/like")
-		likes.POST("", activityHandler.CreateLike)
-		likes.DELETE("", activityHandler.DeleteLike)
+		// Likes
+		activities.POST("/:id/like", activityHandler.CreateLike)
+		activities.DELETE("/:id/like", activityHandler.DeleteLike)
 
-		comments := protected.Group("/comment")
-		comments.POST("", activityHandler.CreateComment)
-		comments.DELETE("", activityHandler.DeleteComment)
+		// Comments
+		activities.POST("/:id/comments", activityHandler.CreateComment)
+		activities.DELETE("/comments/:id", activityHandler.DeleteComment)
 	}
 }
 
 func UploadRoutes(r *gin.RouterGroup, userHandler *user.Handler, activityHandler *activity.Handler) {
-	protected := r.Group("/upload", middlewares.AuthMiddleware())
+	protected := r.Group("/uploads", middlewares.AuthMiddleware())
 	{
 		protected.POST("/avatar", userHandler.UploadAvatar)
-		protected.POST("/activity", activityHandler.UploadActivityPhoto)
+		protected.POST("/activity-photo", activityHandler.UploadActivityPhoto)
 	}
 }

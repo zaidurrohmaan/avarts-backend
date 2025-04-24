@@ -31,10 +31,6 @@ type UpdateProfileRequest struct {
 	AvatarURL *string `json:"avatar_url,omitempty"`
 }
 
-type DeleteUserRequest struct {
-	UserID uint `json:"user_id"`
-}
-
 func GenerateUserResponse(userData *User) (UserResponse) {
 	userResponse := UserResponse {
 		ID: userData.ID,

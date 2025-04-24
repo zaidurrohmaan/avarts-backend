@@ -1,8 +1,14 @@
 package utils
 
 import (
+	"avarts/constants"
+	"avarts/response"
 	"errors"
+	"net/http"
 	"regexp"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 func ValidateUsername(username string) error {
@@ -28,4 +34,17 @@ func ValidateUsername(username string) error {
 	}
 
 	return nil
+}
+
+func GetIDParam(c *gin.Context) (*uint) {
+	idParam := c.Param("id")
+
+	id, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		response.Failed(c, http.StatusBadRequest, constants.InvalidRequestFormat)
+		return nil
+	}
+
+	id_uint := uint(id)
+	return &id_uint
 }

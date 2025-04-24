@@ -17,14 +17,14 @@ type Service interface {
 	GetActivity(activityID *uint) (*ActivityResponse, int, error)
 	GetAllActivities(userID *uint) (*[]ActivityResponse, int, error)
 	UploadActivityPhotoToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, error)
-	DeleteActivity(userID uint, request *DeleteActivityRequest) (int, error)
+	DeleteActivity(userID uint, activityID *uint) (int, error)
 
 	// Like
-	CreateLike(userID uint, like *LikeRequest) (int, error)
-	DeleteLike(userID uint, like *LikeRequest) (int, error)
+	CreateLike(userID uint, activityID *uint) (int, error)
+	DeleteLike(userID uint, activityID *uint) (int, error)
 
 	// Comment
-	CreateComment(userID uint, request *CreateCommentRequest) (*CreateCommentResponse, error)
+	CreateComment(userID uint, activityID *uint, request *CreateCommentRequest) (*CreateCommentResponse, error)
 	DeleteComment(userID, commentID uint) (int, error)
 }
 
@@ -120,9 +120,9 @@ func (s *service) GetAllActivities(userID *uint) (*[]ActivityResponse, int, erro
 	return &activitiesResponse, http.StatusOK, nil
 }
 
-func (s *service) CreateLike(userID uint, request *LikeRequest) (int, error) {
+func (s *service) CreateLike(userID uint, activityID *uint) (int, error) {
 	like := &Like{
-		ActivityID: request.ActivityID,
+		ActivityID: *activityID,
 		UserID:     userID,
 	}
 
@@ -143,9 +143,9 @@ func (s *service) CreateLike(userID uint, request *LikeRequest) (int, error) {
 	return http.StatusCreated, nil
 }
 
-func (s *service) DeleteLike(userID uint, request *LikeRequest) (int, error) {
+func (s *service) DeleteLike(userID uint, activityID *uint) (int, error) {
 	like := &Like{
-		ActivityID: request.ActivityID,
+		ActivityID: *activityID,
 		UserID:     userID,
 	}
 
@@ -166,9 +166,9 @@ func (s *service) DeleteLike(userID uint, request *LikeRequest) (int, error) {
 	return http.StatusOK, nil
 }
 
-func (s *service) CreateComment(userID uint, request *CreateCommentRequest) (*CreateCommentResponse, error) {
+func (s *service) CreateComment(userID uint, activityID *uint, request *CreateCommentRequest) (*CreateCommentResponse, error) {
 	comment := &Comment{
-		ActivityID: request.ActivityID,
+		ActivityID: *activityID,
 		Text:       request.Text,
 		UserID:     userID,
 	}
@@ -228,8 +228,8 @@ func (s *service) UploadActivityPhotoToS3(file *multipart.File, fileHeader *mult
 	return &avatarUrl, nil
 }
 
-func (s *service) DeleteActivity(userID uint, request *DeleteActivityRequest) (int, error) {
-	activity, statusCode, err := s.GetActivity(&request.ActivityID)
+func (s *service) DeleteActivity(userID uint, activityID *uint) (int, error) {
+	activity, statusCode, err := s.GetActivity(activityID)
 	if err != nil {
 		return statusCode, err
 	}
@@ -238,7 +238,7 @@ func (s *service) DeleteActivity(userID uint, request *DeleteActivityRequest) (i
 		return http.StatusForbidden, errors.New(constants.ActivityDeleteAccessDenied)
 	}
 
-	if err := s.repository.DeleteActivity(request.ActivityID); err != nil {
+	if err := s.repository.DeleteActivity(*activityID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return http.StatusNotFound, errors.New(constants.ActivityNotFound)
 		}

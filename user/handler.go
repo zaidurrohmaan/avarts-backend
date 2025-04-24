@@ -60,7 +60,7 @@ func (h *Handler) GetUser(c *gin.Context) {
 	response.Success(c, http.StatusOK, constants.UserFetchSuccess, userResponse)
 }
 
-func (h *Handler) MyProfile(c *gin.Context) {
+func (h *Handler) GetMyProfile(c *gin.Context) {
 	userID, isError := utils.GetUserIDFromJWT(c)
 	if isError {
 		return
@@ -98,18 +98,12 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 }
 
 func (h *Handler) DeleteUser(c *gin.Context) {
-	var req DeleteUserRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Failed(c, http.StatusBadRequest, constants.InvalidRequestFormat)
-		return
-	}
-
 	userID, isError := utils.GetUserIDFromJWT(c)
 	if isError {
 		return
 	}
 
-	statusCode, err := h.service.DeleteUser(userID, req)
+	statusCode, err := h.service.DeleteUser(userID)
 	if err != nil {
 		response.Failed(c, statusCode, err.Error())
 		return

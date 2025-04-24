@@ -39,10 +39,6 @@ type Like struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
-type LikeRequest struct {
-	ActivityID uint `json:"activity_id" binding:"required"`
-}
-
 type Comment struct {
 	ID         uint      `gorm:"primaryKey;autoIncrement" json:"id"`
 	ActivityID uint      `gorm:"not null" json:"activity_id"`
@@ -54,7 +50,6 @@ type Comment struct {
 }
 
 type CreateCommentRequest struct {
-	ActivityID uint   `json:"activity_id"`
 	Text       string `json:"text"`
 }
 
@@ -63,10 +58,6 @@ type CreateCommentResponse struct {
 	UserID     uint   `json:"user_id"`
 	ActivityID uint   `json:"activity_id"`
 	Text       string `json:"text"`
-}
-
-type DeleteCommentRequest struct {
-	CommentID uint `json:"comment_id"`
 }
 
 type CreateActivityRequest struct {
@@ -108,10 +99,6 @@ type ActivityResponse struct {
 	ActivityType string               `json:"activity_type"`
 	Date         time.Time            `json:"date"`
 	PictureURLs  []string             `json:"picture_urls"`
-}
-
-type DeleteActivityRequest struct {
-	ActivityID uint `json:"activity_id"`
 }
 
 func MigrateActivity(db *gorm.DB) {
