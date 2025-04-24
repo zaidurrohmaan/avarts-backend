@@ -4,6 +4,7 @@ import (
 	"avarts/config"
 	"avarts/constants"
 	"bytes"
+	"context"
 	"fmt"
 	"image"
 	_ "image/jpeg"
@@ -13,11 +14,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/google/uuid"
+	awsConfig "github.com/aws/aws-sdk-go-v2/config"
+	s3v2 "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/google/uuid"
 )
 
 func UploadToS3(file multipart.File, fileHeader *multipart.FileHeader, folder string) (string, error) {
@@ -51,7 +54,7 @@ func UploadToS3(file multipart.File, fileHeader *multipart.FileHeader, folder st
 
 func IsValidImage(file *multipart.File, fileHeader *multipart.FileHeader, maxSize int64) error {
 	if fileHeader.Size > maxSize {
-		return fmt.Errorf("%s: %d MB", constants.FileSizeExceeded, maxSize / (1024 * 1024))
+		return fmt.Errorf("%s: %d KB", constants.FileSizeExceeded, maxSize / 1024)
 	}
 
 	ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
@@ -71,4 +74,22 @@ func IsValidImage(file *multipart.File, fileHeader *multipart.FileHeader, maxSiz
 	}
 
 	return nil
+}
+
+func DeleteS3File(bucketName, key string) error {
+	ctx := context.TODO()
+
+	cfg, err := awsConfig.LoadDefaultConfig(ctx)
+	if err != nil {
+		return err
+	}
+
+	s3Client := s3v2.NewFromConfig(cfg)
+
+	_, err = s3Client.DeleteObject(ctx, &s3v2.DeleteObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(key),
+	})
+
+	return err
 }

@@ -1,11 +1,14 @@
 package activity
 
 import (
+	"avarts/config"
 	"avarts/constants"
 	"avarts/utils"
 	"errors"
+	"log"
 	"mime/multipart"
 	"net/http"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -16,8 +19,11 @@ type Service interface {
 	CreateActivity(userID uint, activity *CreateActivityRequest) (*uint, int, error)
 	GetActivity(activityID *uint) (*ActivityResponse, int, error)
 	GetAllActivities(userID *uint) (*[]ActivityResponse, int, error)
-	UploadActivityPhotoToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, error)
 	DeleteActivity(userID uint, activityID *uint) (int, error)
+
+	// Photo
+	UploadActivityPhotoToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, error)
+	DeleteActivityPhotoFromS3(key string) error
 
 	// Like
 	CreateLike(userID uint, activityID *uint) (int, error)
@@ -215,8 +221,8 @@ func (s *service) DeleteComment(userID, commentID uint) (int, error) {
 }
 
 func (s *service) UploadActivityPhotoToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, error) {
-	maxSize_5MB := int64(5 * 1024 * 1024)
-	if err := utils.IsValidImage(file, fileHeader, maxSize_5MB); err != nil {
+	maxSize_1MB := int64(1 * 1024 * 1024)
+	if err := utils.IsValidImage(file, fileHeader, maxSize_1MB); err != nil {
 		return nil, err
 	}
 
@@ -234,6 +240,14 @@ func (s *service) DeleteActivity(userID uint, activityID *uint) (int, error) {
 		return statusCode, err
 	}
 
+	pictureUrls := activity.PictureURLs
+	for _, url := range pictureUrls {
+		key := strings.ReplaceAll(url, "https://avarts-storage.s3.amazonaws.com/", "")
+		if err := s.DeleteActivityPhotoFromS3(key); err != nil {
+			log.Println(constants.DeleteS3PhotoFailed)
+		}
+	}
+
 	if activity.User.ID != userID {
 		return http.StatusForbidden, errors.New(constants.ActivityDeleteAccessDenied)
 	}
@@ -245,4 +259,8 @@ func (s *service) DeleteActivity(userID uint, activityID *uint) (int, error) {
 		return http.StatusInternalServerError, err
 	}
 	return http.StatusOK, nil
+}
+
+func (s *service) DeleteActivityPhotoFromS3(key string) error {
+	return utils.DeleteS3File(config.AWSBucketName, key)
 }

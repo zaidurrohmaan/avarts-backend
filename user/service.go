@@ -89,8 +89,8 @@ func (s *service) UpdateUser(userID uint, updated UpdateProfileRequest) (int, er
 }
 
 func (s *service) UploadAvatarToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, int, error) {
-	maxSize_1MB := int64(1 * 1024 * 1024)
-	if err := utils.IsValidImage(file, fileHeader, maxSize_1MB); err != nil {
+	maxSize_300KB := int64(300 * 1024)
+	if err := utils.IsValidImage(file, fileHeader, maxSize_300KB); err != nil {
 		return nil, http.StatusBadRequest, err
 	}
 

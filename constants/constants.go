@@ -6,11 +6,11 @@ const (
 	StatusFailed  = "failed"
 
 	// User
-	UserFetchSuccess  = "user data fetched"
-	UserNotFound      = "user not found"
-	UserUpdateSuccess = "user data updated"
-	UsernameIsTaken   = "username already taken"
-	UserDeleteSuccess = "user deleted"
+	UserFetchSuccess      = "user data fetched"
+	UserNotFound          = "user not found"
+	UserUpdateSuccess     = "user data updated"
+	UsernameIsTaken       = "username already taken"
+	UserDeleteSuccess     = "user deleted"
 	UserDeleteAccesDenied = "access denied: you are not allowed to delete this user"
 
 	// Activity & Photo
@@ -29,6 +29,7 @@ const (
 	FileSizeExceeded                 = "file size exceeds the maximum size"
 	DeleteActivitySuccess            = "activity deleted"
 	ActivityDeleteAccessDenied       = "access denied: you are not allowed to delete this activity"
+	DeleteS3PhotoFailed              = "failed to delete photo from S3"
 
 	// Auth
 	LoginSuccess   = "logged in"
