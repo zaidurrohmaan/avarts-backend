@@ -21,7 +21,7 @@ type Service interface {
 	DeleteActivity(userID uint, activityID *uint) (int, error)
 
 	// Photo
-	UploadActivityPhotoToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, error)
+	UploadActivityPhotoToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, int, error)
 
 	// Like
 	CreateLike(userID uint, activityID *uint) (int, error)
@@ -218,18 +218,18 @@ func (s *service) DeleteComment(userID, commentID uint) (int, error) {
 	return http.StatusForbidden, errors.New(constants.CommentDeleteAccessDenied)
 }
 
-func (s *service) UploadActivityPhotoToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, error) {
+func (s *service) UploadActivityPhotoToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, int, error) {
 	maxSize_1MB := int64(1 * 1024 * 1024)
 	if err := utils.IsValidImage(file, fileHeader, maxSize_1MB); err != nil {
-		return nil, err
+		return nil, http.StatusBadRequest, err
 	}
 
 	avatarUrl, err := utils.UploadToS3(*file, fileHeader, "activity")
 	if err != nil {
-		return nil, err
+		return nil, http.StatusInternalServerError, err
 	}
 
-	return &avatarUrl, nil
+	return &avatarUrl, http.StatusOK, nil
 }
 
 func (s *service) DeleteActivity(userID uint, activityID *uint) (int, error) {

@@ -32,13 +32,13 @@ func (h *Handler) UploadActivityPhoto(c *gin.Context) {
 	}
 	defer file.Close()
 
-	url, err := h.service.UploadActivityPhotoToS3(&file, fileHeader)
+	url, statusCode, err := h.service.UploadActivityPhotoToS3(&file, fileHeader)
 	if err != nil {
-		response.Failed(c, http.StatusInternalServerError, constants.FileUploadFailed)
+		response.Failed(c, statusCode, err.Error())
 		return
 	}
 
-	response.Success(c, http.StatusCreated, constants.FileUploadSuccess, gin.H{"photo_url": url})
+	response.Success(c, http.StatusOK, constants.FileUploadSuccess, gin.H{"photo_url": url})
 }
 
 func (h *Handler) CreateActivity(c *gin.Context) {
