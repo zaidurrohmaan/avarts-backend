@@ -16,10 +16,10 @@ func AuthRoutes(r *gin.RouterGroup, authHandler *auth.Handler) {
 func UserRoutes(r *gin.RouterGroup, userHandler *user.Handler) {
 	protected := r.Group("/profile", middlewares.AuthMiddleware())
 	{
-		protected.GET("/:username", userHandler.Profile)
+		protected.GET("/:username", userHandler.GetUser)
 		protected.GET("/me", userHandler.MyProfile)
-		protected.PATCH("/update", userHandler.UpdateProfile)
-		protected.DELETE("", userHandler.DeleteActivity)
+		protected.PATCH("/update", userHandler.UpdateUser)
+		protected.DELETE("", userHandler.DeleteUser)
 	}
 }
 
@@ -27,8 +27,8 @@ func ActivityRoutes(r *gin.RouterGroup, activityHandler *activity.Handler) {
 	protected := r.Group("/", middlewares.AuthMiddleware())
 	{
 		activities := protected.Group("/activities")
-		activities.POST("", activityHandler.PostActivity)
-		activities.GET("/:id", activityHandler.GetActivityByID)
+		activities.POST("", activityHandler.CreateActivity)
+		activities.GET("/:id", activityHandler.GetActivity)
 		activities.GET("", activityHandler.GetAllActivities)
 		activities.DELETE("", activityHandler.DeleteActivity)
 
@@ -39,8 +39,6 @@ func ActivityRoutes(r *gin.RouterGroup, activityHandler *activity.Handler) {
 		comments := protected.Group("/comment")
 		comments.POST("", activityHandler.CreateComment)
 		comments.DELETE("", activityHandler.DeleteComment)
-
-		protected.POST("/photos", activityHandler.UploadActivityPhoto)
 	}
 }
 

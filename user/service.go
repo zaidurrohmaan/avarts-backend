@@ -11,10 +11,10 @@ import (
 )
 
 type Service interface {
-	GetByUsername(username string) (*User, error)
-	GetByID(userID uint) (*User, error)
+	GetUserByUsername(username string) (*User, error)
+	GetUser(userID uint) (*User, error)
 	DeleteUser(userID uint, request DeleteUserRequest) (int, error)
-	UpdateProfile(userID uint, updated UpdateProfileRequest) (int, error)
+	UpdateUser(userID uint, updated UpdateProfileRequest) (int, error)
 	UploadAvatarToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, int, error)
 }
 
@@ -26,11 +26,11 @@ func NewService(repository Repository) Service {
 	return &service{repository}
 }
 
-func (s *service) GetByUsername(username string) (*User, error) {
+func (s *service) GetUserByUsername(username string) (*User, error) {
 	return s.repository.GetUserByUsername(username)
 }
 
-func (s *service) GetByID(userID uint) (*User, error) {
+func (s *service) GetUser(userID uint) (*User, error) {
 	return s.repository.GetUser(userID)
 }
 
@@ -48,7 +48,7 @@ func (s *service) DeleteUser(userID uint, request DeleteUserRequest) (int, error
 	return http.StatusOK, nil
 }
 
-func (s *service) UpdateProfile(userID uint, updated UpdateProfileRequest) (int, error) {
+func (s *service) UpdateUser(userID uint, updated UpdateProfileRequest) (int, error) {
 	user, err := s.repository.GetUser(userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

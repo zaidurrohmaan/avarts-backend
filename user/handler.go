@@ -42,10 +42,10 @@ func (h *Handler) UploadAvatar(c *gin.Context) {
 	response.Success(c, statusCode, constants.FileUploadSuccess, gin.H{"photo_url": url})
 }
 
-func (h *Handler) Profile(c *gin.Context) {
+func (h *Handler) GetUser(c *gin.Context) {
 	username := c.Param("username")
 
-	user, err := h.service.GetByUsername(username)
+	user, err := h.service.GetUserByUsername(username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			response.Failed(c, http.StatusNotFound, constants.UserNotFound)
@@ -66,7 +66,7 @@ func (h *Handler) MyProfile(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.GetByID(userID)
+	user, err := h.service.GetUser(userID)
 	if err != nil {
 		response.Failed(c, http.StatusInternalServerError, err.Error())
 		return
@@ -76,7 +76,7 @@ func (h *Handler) MyProfile(c *gin.Context) {
 	response.Success(c, http.StatusOK, constants.UserFetchSuccess, userResponse)
 }
 
-func (h *Handler) UpdateProfile(c *gin.Context) {
+func (h *Handler) UpdateUser(c *gin.Context) {
 	userID, isError := utils.GetUserIDFromJWT(c)
 	if isError {
 		return
@@ -88,7 +88,7 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	statusCode, err := h.service.UpdateProfile(userID, req)
+	statusCode, err := h.service.UpdateUser(userID, req)
 	if err != nil {
 		response.Failed(c, statusCode, err.Error())
 		return
@@ -97,7 +97,7 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 	response.Success(c, statusCode, constants.UserUpdateSuccess, nil)
 }
 
-func (h *Handler) DeleteActivity(c *gin.Context) {
+func (h *Handler) DeleteUser(c *gin.Context) {
 	var req DeleteUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Failed(c, http.StatusBadRequest, constants.InvalidRequestFormat)

@@ -41,7 +41,7 @@ func (h *Handler) UploadActivityPhoto(c *gin.Context) {
 	response.Success(c, http.StatusCreated, constants.FileUploadSuccess, gin.H{"photo_url": url})
 }
 
-func (h *Handler) PostActivity(c *gin.Context) {
+func (h *Handler) CreateActivity(c *gin.Context) {
 	var req CreateActivityRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Failed(c, http.StatusBadRequest, constants.InvalidRequestFormat)
@@ -66,7 +66,7 @@ func (h *Handler) PostActivity(c *gin.Context) {
 	response.Success(c, http.StatusCreated, constants.ActivityCreateSuccess, responseData)
 }
 
-func (h *Handler) GetActivityByID(c *gin.Context) {
+func (h *Handler) GetActivity(c *gin.Context) {
 	idParam := c.Param("id")
 
 	id, err := strconv.ParseUint(idParam, 10, 64)
