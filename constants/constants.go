@@ -26,6 +26,7 @@ const (
 	InvalidImage                     = "file is not a valid image. allowed extensions: .jpg, .jpeg, .png"
 	FileSizeExceeded                 = "file size exceeds the maximum size"
 	DeleteActivitySuccess            = "activity deleted"
+	ActivityDeleteAccessDenied       = "access denied: you are not allowed to delete this activity"
 
 	// Auth
 	LoginSuccess   = "logged in"
@@ -42,8 +43,10 @@ const (
 	CommentCreateSuccess            = "comment created"
 	CommentCreateFailed             = "failed to create comment"
 	CommentDeleteSuccess            = "comment deleted"
+	CommentDeleteFailed             = "failed to delete comment"
 	CommentDeleteAccessDenied       = "access denied: you are not allowed to delete this comment"
 	CommentCreateSuccessWithWarning = "comment created, but failed to fetch full data"
+	CommentNotFound                 = "comment not found"
 
 	// Validation / Error
 	InvalidRequestFormat = "invalid request format"

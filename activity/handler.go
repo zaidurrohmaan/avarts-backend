@@ -188,13 +188,18 @@ func (h *Handler) DeleteComment(c *gin.Context) {
 }
 
 func (h *Handler) DeleteActivity(c *gin.Context) {
+	userID, isError := utils.GetUserIDFromJWT(c)
+	if isError {
+		return
+	}
+
 	var req DeleteActivityRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Failed(c, http.StatusBadRequest, constants.InvalidRequestFormat)
 		return
 	}
 
-	statusCode, err := h.service.DeleteActivity(&req)
+	statusCode, err := h.service.DeleteActivity(userID, &req)
 	if err != nil {
 		response.Failed(c, statusCode, err.Error())
 		return

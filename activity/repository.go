@@ -76,7 +76,11 @@ func (r *repository) GetPictureUrlsByActivityID(activityID *uint) (*[]string, er
 }
 
 func (r *repository) DeletePictureByID(id uint) error {
-	return r.db.Delete(&Picture{}, id).Error
+	result := r.db.Delete(&Picture{}, id)
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return result.Error
 }
 
 func (r *repository) DeleteActivityByID(activityID uint) error {
@@ -118,5 +122,9 @@ func (r *repository) CreateComment(comment *Comment) error {
 }
 
 func (r *repository) DeleteComment(commentID uint) error {
-	return r.db.Delete(&Comment{}, commentID).Error
+	result := r.db.Delete(&Comment{}, commentID)
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return result.Error
 }
