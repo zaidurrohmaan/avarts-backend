@@ -22,7 +22,6 @@ type Service interface {
 
 	// Photo
 	UploadActivityPhotoToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, error)
-	DeleteActivityPhotoFromS3(key string) error
 
 	// Like
 	CreateLike(userID uint, activityID *uint) (int, error)
@@ -242,7 +241,7 @@ func (s *service) DeleteActivity(userID uint, activityID *uint) (int, error) {
 	pictureUrls := activity.PictureURLs
 	for _, url := range pictureUrls {
 		key := strings.ReplaceAll(url, constants.AwsS3PrefixUrl, "")
-		if err := s.DeleteActivityPhotoFromS3(key); err != nil {
+		if err := utils.DeleteS3File(key); err != nil {
 			log.Println(constants.DeleteS3PhotoFailed)
 		}
 	}
@@ -258,8 +257,4 @@ func (s *service) DeleteActivity(userID uint, activityID *uint) (int, error) {
 		return http.StatusInternalServerError, err
 	}
 	return http.StatusOK, nil
-}
-
-func (s *service) DeleteActivityPhotoFromS3(key string) error {
-	return utils.DeleteS3File(key)
 }
