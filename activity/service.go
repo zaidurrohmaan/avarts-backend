@@ -21,7 +21,7 @@ type Service interface {
 
 	// Like
 	CreateLike(userID uint, like *LikeRequest) (int, error)
-	DeleteLike(userID uint, like *LikeRequest) error
+	DeleteLike(userID uint, like *LikeRequest) (int, error)
 
 	// Comment
 	CreateComment(userID uint, request *CreateCommentRequest) (*CreateCommentResponse, error)
@@ -143,7 +143,7 @@ func (s *service) CreateLike(userID uint, request *LikeRequest) (int, error) {
 	return http.StatusCreated, nil
 }
 
-func (s *service) DeleteLike(userID uint, request *LikeRequest) error {
+func (s *service) DeleteLike(userID uint, request *LikeRequest) (int, error) {
 	like := &Like {
 		ActivityID: request.ActivityID,
 		UserID: userID,
@@ -151,19 +151,19 @@ func (s *service) DeleteLike(userID uint, request *LikeRequest) error {
 
 	isLikeExists, err := s.repository.IsLikeExists(like)
 	if err != nil {
-		return err
+		return http.StatusInternalServerError, err
 	}
 
 	if !isLikeExists {
-		return errors.New(constants.LikeNotFound)
+		return http.StatusNotFound, errors.New(constants.LikeNotFound)
 	}
 	
 	err = s.repository.DeleteLike(like)
 	if err != nil {
-		return err
+		return http.StatusInternalServerError, err
 	}
 
-	return nil
+	return http.StatusOK, nil
 }
 
 func (s *service) CreateComment(userID uint, request *CreateCommentRequest) (*CreateCommentResponse, error) {

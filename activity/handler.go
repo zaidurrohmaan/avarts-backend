@@ -137,13 +137,13 @@ func (h *Handler) DeleteLike(c *gin.Context) {
 		return
 	}
 
-	err := h.service.DeleteLike(userID, &req)
+	statusCode, err := h.service.DeleteLike(userID, &req)
 	if err != nil {
-		response.Failed(c, http.StatusInternalServerError, err.Error())
+		response.Failed(c, statusCode, err.Error())
 		return
 	}
 
-	response.Success(c, http.StatusOK, constants.LikeDeleted, nil)
+	response.Success(c, statusCode, constants.LikeDeleted, nil)
 }
 
 func (h *Handler) CreateComment(c *gin.Context) {
