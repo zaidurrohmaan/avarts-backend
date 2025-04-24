@@ -25,6 +25,7 @@ const (
 	ReadFileFailed                   = "failed to read file"
 	InvalidImage                     = "file is not a valid image. allowed extensions: .jpg, .jpeg, .png"
 	FileSizeExceeded                 = "file size exceeds the maximum size"
+	DeleteActivitySuccess            = "activity deleted"
 
 	// Auth
 	LoginSuccess   = "logged in"

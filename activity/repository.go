@@ -80,7 +80,11 @@ func (r *repository) DeletePictureByID(id uint) error {
 }
 
 func (r *repository) DeleteActivityByID(activityID uint) error {
-	return r.db.Delete(&Activity{}, activityID).Error
+	result := r.db.Delete(&Activity{}, activityID)
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return result.Error
 }
 
 func (r *repository) CreateLike(like *Like) error {

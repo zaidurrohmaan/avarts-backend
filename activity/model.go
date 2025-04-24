@@ -110,6 +110,10 @@ type ActivityResponse struct {
 	PictureURLs  []string             `json:"picture_urls"`
 }
 
+type DeleteActivityRequest struct {
+	ActivityID uint `json:"activity_id"`
+}
+
 func MigrateActivity(db *gorm.DB) {
 	db.AutoMigrate(&Activity{}, &Picture{}, &Like{}, &Comment{})
 }

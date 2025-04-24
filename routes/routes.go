@@ -29,6 +29,7 @@ func ActivityRoutes(r *gin.RouterGroup, activityHandler *activity.Handler) {
 		activities.POST("", activityHandler.PostActivity)
 		activities.GET("/:id", activityHandler.GetActivityByID)
 		activities.GET("", activityHandler.GetAllActivities)
+		activities.DELETE("", activityHandler.DeleteActivity)
 
 		likes := protected.Group("/like")
 		likes.POST("", activityHandler.CreateLike)

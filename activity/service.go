@@ -17,13 +17,14 @@ type Service interface {
 	GetByID(activityID *uint) (*ActivityResponse, int, error)
 	GetAll(userID *uint) (*[]ActivityResponse, int, error)
 	UploadActivityPhotoToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, error)
+	DeleteActivity(request *DeleteActivityRequest) (int, error)
 
 	// Like
 	CreateLike(userID uint, like *LikeRequest) (int, error)
 	DeleteLike(userID uint, like *LikeRequest) error
 
 	// Comment
-	CreateComment(userID uint, comment *CreateCommentRequest) (*CreateCommentResponse, error)
+	CreateComment(userID uint, request *CreateCommentRequest) (*CreateCommentResponse, error)
 	DeleteComment(userID, commentID uint) (int, error)
 }
 
@@ -219,4 +220,14 @@ func (s *service) UploadActivityPhotoToS3(file *multipart.File, fileHeader *mult
 	}
 
 	return &avatarUrl, nil
+}
+
+func (s *service) DeleteActivity(request *DeleteActivityRequest) (int, error) {
+	if err := s.repository.DeleteActivityByID(request.ActivityID); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return http.StatusNotFound, errors.New(constants.ActivityNotFound)
+		}
+		return http.StatusInternalServerError, err
+	}
+	return http.StatusOK, nil
 }

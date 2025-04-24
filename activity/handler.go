@@ -186,3 +186,19 @@ func (h *Handler) DeleteComment(c *gin.Context) {
 	}
 	response.Success(c, statusCode, constants.CommentDeleteSuccess, nil)
 }
+
+func (h *Handler) DeleteActivity(c *gin.Context) {
+	var req DeleteActivityRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Failed(c, http.StatusBadRequest, constants.InvalidRequestFormat)
+		return
+	}
+
+	statusCode, err := h.service.DeleteActivity(&req)
+	if err != nil {
+		response.Failed(c, statusCode, err.Error())
+		return
+	}
+
+	response.Success(c, statusCode, constants.DeleteActivitySuccess, nil)
+}
