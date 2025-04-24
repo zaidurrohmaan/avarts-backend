@@ -88,11 +88,11 @@ func (h *Handler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	err := h.service.UpdateProfile(userID, req)
+	statusCode, err := h.service.UpdateProfile(userID, req)
 	if err != nil {
-		response.Failed(c, http.StatusInternalServerError, err.Error())
+		response.Failed(c, statusCode, err.Error())
 		return
 	}
 
-	response.Success(c, http.StatusOK, constants.UserUpdateSuccess, nil)
+	response.Success(c, statusCode, constants.UserUpdateSuccess, nil)
 }

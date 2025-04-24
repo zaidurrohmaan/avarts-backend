@@ -13,7 +13,7 @@ import (
 type Service interface {
 	GetByUsername(username string) (*User, error)
 	GetByID(userID uint) (*User, error)
-	UpdateProfile(userID uint, updated UpdateProfileRequest) error
+	UpdateProfile(userID uint, updated UpdateProfileRequest) (int, error)
 	UploadAvatarToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, int, error)
 }
 
@@ -33,27 +33,31 @@ func (s *service) GetByID(userID uint) (*User, error) {
 	return s.repository.Get(userID)
 }
 
-func (s *service) UpdateProfile(userID uint, updated UpdateProfileRequest) error {
+func (s *service) UpdateProfile(userID uint, updated UpdateProfileRequest) (int, error) {
 	user, err := s.repository.Get(userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errors.New(constants.UserNotFound)
+			return http.StatusNotFound, errors.New(constants.UserNotFound)
 		}
-		return err
+		return http.StatusInternalServerError, err
 	}
 
 	if updated.Username != nil {
-		newUsername := updated.Username
+		newUsername := *updated.Username
 
-		if user.Username != *newUsername {
-			taken, err := s.repository.IsUsernameTaken(*newUsername)
+		if err = utils.ValidateUsername(newUsername); err != nil {
+			return http.StatusBadRequest,err
+		}
+
+		if user.Username != newUsername {
+			taken, err := s.repository.IsUsernameTaken(newUsername)
 			if err != nil {
-				return err
+				return http.StatusInternalServerError, err
 			}
 			if !taken {
-				user.Username = *newUsername
+				user.Username = newUsername
 			} else {
-				return errors.New(constants.UsernameIsTaken)
+				return http.StatusBadRequest, errors.New(constants.UsernameIsTaken)
 			}
 		}
 	}
@@ -66,7 +70,11 @@ func (s *service) UpdateProfile(userID uint, updated UpdateProfileRequest) error
 		user.AvatarUrl = *updated.AvatarURL
 	}
 
-	return s.repository.Update(user)
+	if err = s.repository.Update(user); err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	return http.StatusOK, nil
 }
 
 func (s *service) UploadAvatarToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, int, error) {

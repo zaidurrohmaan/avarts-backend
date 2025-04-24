@@ -35,8 +35,8 @@ func (s *service) LoginWithGoogle(idToken string) (*LoginResponse, error) {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			emailPrefix := strings.SplitN(googleUserInfo.Email, "@", 2)
-			baseUsername := emailPrefix[0]
-			username := baseUsername
+			baseUsername := strings.ToLower(emailPrefix[0])
+			username := strings.ReplaceAll(baseUsername, "-", "")
 
 			for i := 1; ; i++ {
 				taken, err := s.repository.IsUsernameTaken(username)
