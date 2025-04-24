@@ -14,6 +14,7 @@ type Repository interface {
 	UpdateUser(user *User) error
 	DeleteUser(userID uint) error
 	IsUsernameTaken(username string) (bool, error)
+	GetPictureURLsByUserID(userID uint) ([]string, error)
 }
 
 type repository struct {
@@ -66,4 +67,20 @@ func (r *repository) IsUsernameTaken(username string) (bool, error) {
 	var count int64
 	err := r.db.Model(&User{}).Where("username = ?", username).Count(&count).Error
 	return count > 0, err
+}
+
+func (r *repository) GetPictureURLsByUserID(userID uint) ([]string, error) {
+	var urls []string
+
+	err := r.db.
+		Table("pictures").
+		Select("pictures.url").
+		Joins("JOIN activities ON pictures.activity_id = activities.id").
+		Where("activities.user_id = ?", userID).
+		Scan(&urls).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return urls, nil
 }

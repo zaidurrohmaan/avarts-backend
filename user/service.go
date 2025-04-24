@@ -44,9 +44,20 @@ func (s *service) DeleteUser(userID uint) (int, error) {
 		return http.StatusInternalServerError, err
 	}
 
+	// Delete user's avatar from cloud storage
 	avatarUrl := user.AvatarUrl
 	key := strings.ReplaceAll(avatarUrl, constants.AwsS3PrefixUrl, "")
 	utils.DeleteS3File(key)
+
+	// Delete user's activity photos from cloud storage
+	activityPhotoUrls, _ := s.repository.GetPictureURLsByUserID(userID)
+	if len(activityPhotoUrls) > 0 {
+		for _, url := range activityPhotoUrls {
+			key := strings.ReplaceAll(url, constants.AwsS3PrefixUrl, "")
+			utils.DeleteS3File(key)
+		}
+	}
+
 	if err := s.repository.DeleteUser(userID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return http.StatusNotFound, errors.New(constants.UserNotFound)
