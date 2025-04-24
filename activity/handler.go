@@ -76,7 +76,7 @@ func (h *Handler) GetActivityByID(c *gin.Context) {
 	}
 	activityID := uint(id)
 
-	responseData, statusCode, err := h.service.GetByID(&activityID)
+	responseData, statusCode, err := h.service.GetActivity(&activityID)
 	if err != nil {
 		response.Failed(c, statusCode, err.Error())
 		return
@@ -94,7 +94,7 @@ func (h *Handler) GetAllActivities(c *gin.Context) {
 		}
 	}
 
-	responseData, statusCode, err := h.service.GetAll(userID)
+	responseData, statusCode, err := h.service.GetAllActivities(userID)
 	if err != nil {
 		response.Failed(c, statusCode, err.Error())
 		return

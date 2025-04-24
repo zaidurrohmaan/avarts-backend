@@ -14,8 +14,8 @@ import (
 type Service interface {
 	// Activity
 	CreateActivity(userID uint, activity *CreateActivityRequest) (*uint, int, error)
-	GetByID(activityID *uint) (*ActivityResponse, int, error)
-	GetAll(userID *uint) (*[]ActivityResponse, int, error)
+	GetActivity(activityID *uint) (*ActivityResponse, int, error)
+	GetAllActivities(userID *uint) (*[]ActivityResponse, int, error)
 	UploadActivityPhotoToS3(file *multipart.File, fileHeader *multipart.FileHeader) (*string, error)
 	DeleteActivity(userID uint, request *DeleteActivityRequest) (int, error)
 
@@ -56,7 +56,7 @@ func (s *service) CreateActivity(userID uint, request *CreateActivityRequest) (*
 	}
 
 	// Save activity
-	err := s.repository.Create(&activity)
+	err := s.repository.CreateActivity(&activity)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
@@ -69,7 +69,7 @@ func (s *service) CreateActivity(userID uint, request *CreateActivityRequest) (*
 		}
 		if err := s.repository.CreatePicture(&pic); err != nil {
 			// Rollback: delete the activity, and all associated pictures will be automatically deleted as well
-			_ = s.repository.DeleteActivityByID(activity.ID)
+			_ = s.repository.DeleteActivity(activity.ID)
 			return nil, http.StatusInternalServerError, errors.New(constants.ActivityCreateFailed)
 		}
 	}
@@ -77,8 +77,8 @@ func (s *service) CreateActivity(userID uint, request *CreateActivityRequest) (*
 	return &activity.ID, http.StatusCreated, nil
 }
 
-func (s *service) GetByID(activityID *uint) (*ActivityResponse, int, error) {
-	activity, err := s.repository.GetByID(activityID)
+func (s *service) GetActivity(activityID *uint) (*ActivityResponse, int, error) {
+	activity, err := s.repository.GetActivity(activityID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, http.StatusNotFound, errors.New(constants.ActivityNotFound)
@@ -96,8 +96,8 @@ func (s *service) GetByID(activityID *uint) (*ActivityResponse, int, error) {
 	return &activityResponse, http.StatusOK, nil
 }
 
-func (s *service) GetAll(userID *uint) (*[]ActivityResponse, int, error) {
-	activities, err := s.repository.GetAll(userID)
+func (s *service) GetAllActivities(userID *uint) (*[]ActivityResponse, int, error) {
+	activities, err := s.repository.GetAllActivities(userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, http.StatusNotFound, errors.New(constants.ActivityNotFound)
@@ -144,9 +144,9 @@ func (s *service) CreateLike(userID uint, request *LikeRequest) (int, error) {
 }
 
 func (s *service) DeleteLike(userID uint, request *LikeRequest) (int, error) {
-	like := &Like {
+	like := &Like{
 		ActivityID: request.ActivityID,
-		UserID: userID,
+		UserID:     userID,
 	}
 
 	isLikeExists, err := s.repository.IsLikeExists(like)
@@ -157,7 +157,7 @@ func (s *service) DeleteLike(userID uint, request *LikeRequest) (int, error) {
 	if !isLikeExists {
 		return http.StatusNotFound, errors.New(constants.LikeNotFound)
 	}
-	
+
 	err = s.repository.DeleteLike(like)
 	if err != nil {
 		return http.StatusInternalServerError, err
@@ -229,7 +229,7 @@ func (s *service) UploadActivityPhotoToS3(file *multipart.File, fileHeader *mult
 }
 
 func (s *service) DeleteActivity(userID uint, request *DeleteActivityRequest) (int, error) {
-	activity, statusCode, err := s.GetByID(&request.ActivityID)
+	activity, statusCode, err := s.GetActivity(&request.ActivityID)
 	if err != nil {
 		return statusCode, err
 	}
@@ -238,7 +238,7 @@ func (s *service) DeleteActivity(userID uint, request *DeleteActivityRequest) (i
 		return http.StatusForbidden, errors.New(constants.ActivityDeleteAccessDenied)
 	}
 
-	if err := s.repository.DeleteActivityByID(request.ActivityID); err != nil {
+	if err := s.repository.DeleteActivity(request.ActivityID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return http.StatusNotFound, errors.New(constants.ActivityNotFound)
 		}

@@ -31,7 +31,7 @@ func (s *service) LoginWithGoogle(idToken string) (*LoginResponse, error) {
 
 	var responseData LoginResponse
 
-	user, err := s.repository.GetByGoogleId(googleUserInfo.GoogleID)
+	user, err := s.repository.GetUserByGoogleId(googleUserInfo.GoogleID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			emailPrefix := strings.SplitN(googleUserInfo.Email, "@", 2)
@@ -57,7 +57,7 @@ func (s *service) LoginWithGoogle(idToken string) (*LoginResponse, error) {
 				GoogleID:  googleUserInfo.GoogleID,
 			}
 
-			err = s.repository.Create(user)
+			err = s.repository.CreateUser(user)
 			if err != nil {
 				return nil, err
 			}

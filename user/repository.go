@@ -7,11 +7,11 @@ import (
 )
 
 type Repository interface {
-	Get(userID uint) (*User, error)
-	GetByUsername(username string) (*User, error)
-	GetByGoogleId(googleId string) (*User, error)
-	Create(user *User) error
-	Update(user *User) error
+	GetUser(userID uint) (*User, error)
+	GetUserByUsername(username string) (*User, error)
+	GetUserByGoogleId(googleId string) (*User, error)
+	CreateUser(user *User) error
+	UpdateUser(user *User) error
 	IsUsernameTaken(username string) (bool, error)
 }
 
@@ -23,33 +23,33 @@ func NewRepository(db *gorm.DB) Repository {
 	return &repository{db}
 }
 
-func (r *repository) Get(userID uint) (*User, error) {
+func (r *repository) GetUser(userID uint) (*User, error) {
 	var user User
 	result := r.db.First(&user, userID)
 	return &user, result.Error
 }
 
-func (r *repository) GetByUsername(username string) (*User, error) {
+func (r *repository) GetUserByUsername(username string) (*User, error) {
 	var user User
 	result := r.db.Where("username = ?", username).First(&user)
 	if result.Error != nil {
-		log.Println("Error in GetByUsername:", result.Error)
+		log.Println("Error in GetUserByUsername:", result.Error)
 	}
 	return &user, result.Error
 }
 
-func (r *repository) GetByGoogleId(googleId string) (*User, error) {
+func (r *repository) GetUserByGoogleId(googleId string) (*User, error) {
 	var user User
 
 	result := r.db.Where("google_id = ?", googleId).First(&user)
 	return &user, result.Error
 }
 
-func (r *repository) Create(user *User) error {
+func (r *repository) CreateUser(user *User) error {
 	return r.db.Create(user).Error
 }
 
-func (r *repository) Update(user *User) error {
+func (r *repository) UpdateUser(user *User) error {
 	return r.db.Save(user).Error
 }
 

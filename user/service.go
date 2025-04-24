@@ -26,15 +26,15 @@ func NewService(repository Repository) Service {
 }
 
 func (s *service) GetByUsername(username string) (*User, error) {
-	return s.repository.GetByUsername(username)
+	return s.repository.GetUserByUsername(username)
 }
 
 func (s *service) GetByID(userID uint) (*User, error) {
-	return s.repository.Get(userID)
+	return s.repository.GetUser(userID)
 }
 
 func (s *service) UpdateProfile(userID uint, updated UpdateProfileRequest) (int, error) {
-	user, err := s.repository.Get(userID)
+	user, err := s.repository.GetUser(userID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return http.StatusNotFound, errors.New(constants.UserNotFound)
@@ -70,7 +70,7 @@ func (s *service) UpdateProfile(userID uint, updated UpdateProfileRequest) (int,
 		user.AvatarUrl = *updated.AvatarURL
 	}
 
-	if err = s.repository.Update(user); err != nil {
+	if err = s.repository.UpdateUser(user); err != nil {
 		return http.StatusInternalServerError, err
 	}
 

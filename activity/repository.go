@@ -6,15 +6,14 @@ import (
 
 type Repository interface {
 	// Activity
-	Create(activity *Activity) error
-	GetByID(activityID *uint) (*Activity, error)
-	GetAll(userID *uint) (*[]Activity, error)
-	DeleteActivityByID(activityID uint) error
+	CreateActivity(activity *Activity) error
+	GetActivity(activityID *uint) (*Activity, error)
+	GetAllActivities(userID *uint) (*[]Activity, error)
+	DeleteActivity(activityID uint) error
 
 	// Picture
 	CreatePicture(picture *Picture) error
 	GetPictureUrlsByActivityID(activityID *uint) (*[]string, error)
-	DeletePictureByID(id uint) error
 
 	// Like
 	IsLikeExists(like *Like) (bool, error)
@@ -35,7 +34,7 @@ func NewRepository(db *gorm.DB) Repository {
 	return &repository{db}
 }
 
-func (r *repository) Create(activity *Activity) error {
+func (r *repository) CreateActivity(activity *Activity) error {
 	return r.db.Create(activity).Error
 }
 
@@ -43,7 +42,7 @@ func (r *repository) CreatePicture(pics *Picture) error {
 	return r.db.Create(pics).Error
 }
 
-func (r *repository) GetByID(activityID *uint) (*Activity, error) {
+func (r *repository) GetActivity(activityID *uint) (*Activity, error) {
 	var activity Activity
 	err := r.db.Preload("User").First(&activity, activityID).Error
 	if err != nil {
@@ -52,7 +51,7 @@ func (r *repository) GetByID(activityID *uint) (*Activity, error) {
 	return &activity, nil
 }
 
-func (r *repository) GetAll(userID *uint) (*[]Activity, error) {
+func (r *repository) GetAllActivities(userID *uint) (*[]Activity, error) {
 	var activities []Activity
 	query := r.db.Preload("User")
 	if userID != nil {
@@ -75,15 +74,7 @@ func (r *repository) GetPictureUrlsByActivityID(activityID *uint) (*[]string, er
 	return &urls, nil
 }
 
-func (r *repository) DeletePictureByID(id uint) error {
-	result := r.db.Delete(&Picture{}, id)
-	if result.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound
-	}
-	return result.Error
-}
-
-func (r *repository) DeleteActivityByID(activityID uint) error {
+func (r *repository) DeleteActivity(activityID uint) error {
 	result := r.db.Delete(&Activity{}, activityID)
 	if result.RowsAffected == 0 {
 		return gorm.ErrRecordNotFound
