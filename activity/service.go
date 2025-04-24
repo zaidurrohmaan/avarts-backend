@@ -191,6 +191,9 @@ func (s *service) CreateComment(userID uint, request *CreateCommentRequest) (*Cr
 func (s *service) DeleteComment(userID, commentID uint) (int, error) {
 	comment, err := s.repository.GetCommentWithActivity(commentID)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return http.StatusNotFound, errors.New(constants.CommentNotFound)
+		}
 		return http.StatusInternalServerError, err
 	}
 
