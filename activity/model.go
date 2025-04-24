@@ -10,7 +10,7 @@ import (
 type Activity struct {
 	ID           uint      `gorm:"primaryKey;autoIncrement" json:"id"`
 	UserID       uint      `gorm:"not null" json:"user_id"`
-	User         user.User `gorm:"foreignKey:UserID;references:ID" json:"user"`
+	User         user.User `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE;" json:"user"`
 	Title        string    `gorm:"type:varchar(100)" json:"title"`
 	Caption      string    `gorm:"type:text" json:"caption"`
 	Distance     float64   `gorm:"type:float" json:"distance"`
@@ -35,6 +35,7 @@ type Like struct {
 	ID         uint      `gorm:"primaryKey;autoIncrement" json:"id"`
 	ActivityID uint      `gorm:"not null" json:"activity_id"`
 	UserID     uint      `gorm:"not null" json:"user_id"`
+	Activity   Activity  `gorm:"foreignKey:ActivityID;constraint:onDelete:CASCADE;" json:"-"`
 	CreatedAt  time.Time `json:"created_at"`
 }
 
@@ -47,7 +48,7 @@ type Comment struct {
 	ActivityID uint      `gorm:"not null" json:"activity_id"`
 	UserID     uint      `gorm:"not null" json:"user_id"`
 	Text       string    `gorm:"type:text;not null" json:"text"`
-	Activity   Activity  `gorm:"foreingKey:ActivityID"`
+	Activity   Activity  `gorm:"foreignKey:ActivityID;constraint:OnDelete:CASCADE;" json:"-"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
